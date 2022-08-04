@@ -1,0 +1,7 @@
+{
+    "port": 3001,
+    "discordClientID": "my_client_id",
+    "discordClientSecret": "my_client_secret",
+    "discordRedirectURI": "http://localhost:3001/discord/getToken",
+    "rateLimitBypassTokens": []
+}
