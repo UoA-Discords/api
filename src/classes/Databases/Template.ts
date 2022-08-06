@@ -1,62 +1,51 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'fs';
 import { join } from 'path';
 
 export class DatabaseManager<T extends { id: string } = { id: string }> {
+    /** Full name of folder inside the `data` directory, e.g. "users" or "subfolder/guilds". */
     public readonly fileName: string;
+
+    /** Singular noun to refer to database items as (used in error messages).  */
     public readonly itemName: string;
 
+    /** `data` joined with file name. */
     private readonly _filePath: string;
-    protected readonly _data: Record<string, T>;
 
-    public constructor(fileName: string, intialValue: Record<string, T>, itemName: string) {
+    /**
+     * @param {String} fileName Full name of folder inside the `data` directory, e.g. "users" or "subfolder/guilds".
+     * @param {String} itemName Singular noun to refer to database items as (used in error messages).
+     */
+    public constructor(fileName: string, itemName: string) {
         this.fileName = fileName;
         this._filePath = join(`data`, this.fileName);
         this.itemName = itemName;
 
-        if (!existsSync(`data`)) {
-            mkdirSync(`data`);
-        }
-
         if (!existsSync(this._filePath)) {
-            writeFileSync(this._filePath, JSON.stringify(intialValue), `utf-8`);
-            this._data = intialValue;
-        } else {
-            this._data = JSON.parse(readFileSync(this._filePath, `utf-8`));
+            mkdirSync(this._filePath, { recursive: true });
         }
     }
 
-    protected save(): void {
-        writeFileSync(this._filePath, JSON.stringify(this._data), `utf-8`);
+    /** Checks if an entry exists in the database. */
+    public has(id: string): boolean {
+        return existsSync(join(this._filePath, `${id}.json`));
     }
 
-    public get(id: string): T | undefined {
-        return this._data[id];
+    /** Gets an entry from the database, will error if entry does not exist. */
+    public get(id: string): T {
+        return JSON.parse(readFileSync(join(this._filePath, `${id}.json`), `utf-8`));
     }
 
-    /** @Throws Throws an error if an item with that ID already exists. */
-    public add(item: T): void {
-        if (this.get(item.id) !== undefined) {
-            throw new Error(`${this.itemName} with ID "${item.id}" already exists!`);
-        }
-        this._data[item.id] = item;
-        this.save();
+    /** Adds or updates an entry in the database.  */
+    public set(item: T): void {
+        return writeFileSync(join(this._filePath, `${item.id}.json`), JSON.stringify(item), `utf-8`);
     }
 
-    /** @throws Throws an error if an item with that ID does not exist. */
+    /** Removes an entry from the database, will error if entry does not exist. */
     public remove(id: string): void {
-        if (this.get(id) === undefined) {
-            throw new Error(`${this.itemName} with ID "${id}" does not exist!`);
-        }
-        delete this._data[id];
-        this.save();
+        return rmSync(join(this._filePath, `${id}.json`));
     }
 
-    /** @throws Throws an error if an item with that ID does not exist. */
-    public update(item: T): void {
-        if (this.get(item.id) === undefined) {
-            throw new Error(`${this.itemName} with ID "${item.id}" does not exist!`);
-        }
-        this._data[item.id] = item;
-        this.save();
+    public get size(): number {
+        return readdirSync(this._filePath, `utf-8`).length;
     }
 }
