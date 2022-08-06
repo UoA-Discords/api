@@ -3,5 +3,7 @@
     "discordClientID": "my_client_id",
     "discordClientSecret": "my_client_secret",
     "discordRedirectURI": "http://localhost:3001/discord/getToken",
-    "rateLimitBypassTokens": []
+    "rateLimitBypassTokens": [],
+    "maxRequestsPerMinute": 30,
+    "numProxies": 0
 }

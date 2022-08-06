@@ -12,12 +12,10 @@ export class Server {
         this._app.use(cors());
         this._app.use(express.json());
 
-        if (Config.numProxies !== undefined) {
-            this._app.set(`trust proxy`, Config.numProxies);
-        }
+        this._app.set(`trust proxy`, Config.numProxies);
 
         // 30 requests per minute
-        const bypassTokens = new Set<string>(Config.rateLimitBypassTokens ?? []);
+        const bypassTokens = new Set<string>(Config.rateLimitBypassTokens);
         this._app.use(
             rateLimit({
                 windowMs: 60 * 1000,
