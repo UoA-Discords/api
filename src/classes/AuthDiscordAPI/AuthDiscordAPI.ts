@@ -1,7 +1,9 @@
 import axios from 'axios';
-import { OAuth2Routes, RESTPostOAuth2AccessTokenResult } from 'discord-api-types/v10';
+import { APIUser, OAuth2Routes, RESTPostOAuth2AccessTokenResult } from 'discord-api-types/v10';
 import { Config } from '../../global/Config';
 import { getUserInfo } from '../../shared/DiscordAPI';
+import { SiteUser, UserPermissionLevels } from '../../shared/Types/User';
+import { UserDatabase } from '../Databases';
 import { Loggers } from '../Loggers';
 
 export interface IpWaitingState {
@@ -83,10 +85,55 @@ export abstract class AuthDiscordAPI {
         action: `logged in` | `logged out` | `refreshed`,
     ): Promise<void> {
         try {
-            const { username, discriminator } = await getUserInfo(accessToken);
+            const discordUser = await getUserInfo(accessToken);
+            const { username, discriminator, id, avatar } = discordUser;
+
             Loggers.sessions.main.log(`${username}#${discriminator} (${ip}) ${action}`);
+
+            let siteUser: SiteUser;
+            if (UserDatabase.has(id)) {
+                siteUser = UserDatabase.get(id);
+                if (action !== `logged out`) {
+                    siteUser.lastLogin = new Date().toISOString();
+                }
+                siteUser.ip = ip;
+                AuthDiscordAPI.updateUserDiscordData(discordUser, siteUser);
+            } else {
+                siteUser = {
+                    ip,
+                    firstLogin: new Date().toISOString(),
+                    lastLogin: new Date().toISOString(),
+                    permissionLevel: UserPermissionLevels.Default,
+                    applicationStats: {
+                        applied: 0,
+                        approved: 0,
+                        denied: 0,
+                        withdrawn: 0,
+                    },
+                    likes: [],
+                    dislikes: [],
+                    username: username,
+                    discriminator: discriminator,
+                    id: id,
+                    avatar: avatar,
+                };
+            }
+            UserDatabase.set(siteUser);
         } catch (error) {
+            if (action === `logged out`) {
+                throw new Error(`Token already revoked, or otherwise unusable`);
+            }
             Loggers.error.log(`Failed to get user data for session logging, ip="${ip}", action="${action}"`);
+        }
+    }
+
+    /** Updates a site user's Discord information. */
+    private static updateUserDiscordData(discordUser: APIUser, siteUser: SiteUser): void {
+        siteUser.username = discordUser.username;
+        siteUser.discriminator = discordUser.discriminator;
+        siteUser.avatar = discordUser.avatar;
+        if (discordUser.public_flags !== undefined) {
+            siteUser.public_flags = discordUser.public_flags;
         }
     }
 }

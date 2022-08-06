@@ -9,7 +9,7 @@ type AllTypes = `undefined` | `object` | `boolean` | `number` | `bigint` | `stri
 export function invalidRequestProperty(
     res: Response,
     propertyName: string,
-    location: `body` | `header` | `query`,
+    location: `body` | `header` | `query` | `params`,
     expectedType: AllTypes,
     received: unknown,
 ): void {
@@ -17,6 +17,8 @@ export function invalidRequestProperty(
         res.status(400).json(`Body "${propertyName}" must be a ${expectedType} (got ${typeof received})`);
     } else if (location === `query`) {
         res.status(400).json(`Query parameter "${propertyName}" must be a ${expectedType} (got ${typeof received})`);
+    } else if (location === `params`) {
+        res.status(400).json(`Missing ${propertyName} in URL`);
     } else {
         res.status(400).json(`Header "${propertyName}" must be a ${expectedType} (got ${typeof received})`);
     }

@@ -11,7 +11,12 @@ export async function revokeToken(req: Request, res: Response): Promise<void> {
             return invalidRequestProperty(res, `token`, `body`, `string`, token);
         }
 
-        await AuthDiscordAPI.logUserAction(req.ip, token, `logged out`);
+        try {
+            await AuthDiscordAPI.logUserAction(req.ip, token, `logged out`);
+        } catch (error) {
+            res.status(400).json((error as Error).message);
+            return;
+        }
 
         res.status(200).json(await AuthDiscordAPI.revokeToken(token));
     } catch (error) {

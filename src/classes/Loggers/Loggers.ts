@@ -16,4 +16,5 @@ export const Loggers = {
         /** Overwritten, expired, fulfilled, and warning state information. */
         state: new Logger(`sessions/states.log`, behaviour, devmode),
     },
+    permissionChanges: new Logger(`permissions.log`, behaviour, devmode),
 };
