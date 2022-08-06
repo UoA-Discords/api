@@ -3,6 +3,8 @@ import express, { Express } from 'express';
 import rateLimit from 'express-rate-limit';
 import { Config } from '../global/Config';
 import { appRoutes } from '../handlers';
+import { EntryStates } from '../shared/Types/Entries';
+import { EntriesDatabases, UserDatabase } from './Databases';
 import { Loggers } from './Loggers';
 
 export class Server {
@@ -46,6 +48,18 @@ export class Server {
         this._app.get(`/ip`, (req, res) => res.send(req.ip));
 
         appRoutes(this._app, ``);
+
+        const pendingSize = EntriesDatabases[EntryStates.PendingApproval].size;
+        const approvedSize = EntriesDatabases[EntryStates.Approved].size;
+        const deniedSize = EntriesDatabases[EntryStates.Denied].size;
+        const withdrawnSize = EntriesDatabases[EntryStates.Withdrawn].size;
+
+        Loggers.info.log(
+            `Registered ${pendingSize} pending, ${approvedSize} approved, ${deniedSize} denied, and ${withdrawnSize} withdrawn entries in 4 databases`,
+        );
+
+        const usersSize = UserDatabase.size;
+        Loggers.info.log(`Registered ${usersSize} users`);
 
         const listener = this._app.listen(Config.port, () => {
             const addressInfo = listener.address();
