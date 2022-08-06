@@ -16,7 +16,10 @@ jobs:
                 # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
         steps:
-            - uses: actions/checkout@v2
+            - name: Checkout Repository & Submodules
+              uses: actions/checkout@v2
+              with:
+                submodules: recursive
             - name: Setup Node ${{ matrix.node-version }}
               uses: actions/setup-node@v2
               with:
