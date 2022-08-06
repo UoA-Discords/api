@@ -5,6 +5,7 @@ import { refreshToken } from './refreshToken';
 import { revokeToken } from './revokeToken';
 
 export const discordAuthRoutes: RouteWrapper = (app, route) => {
+    /** Must be GET since Discord will redirect here (under standard config). */
     app.get(`${route}/getToken`, getToken);
     app.post(`${route}/refreshToken`, refreshToken);
     app.post(`${route}/revokeToken`, revokeToken);
