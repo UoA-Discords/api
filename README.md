@@ -2,6 +2,10 @@
 
 Backend API for the UoA Discords project.
 
+[![CodeQL](https://github.com/UoA-Discords/api/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/UoA-Discords/api/actions/workflows/codeql-analysis.yml)
+[![Deploy](https://github.com/UoA-Discords/api/actions/workflows/deploy.yml/badge.svg)](https://github.com/UoA-Discords/api/actions/workflows/deploy.yml)
+[![Node.js CI](https://github.com/UoA-Discords/api/actions/workflows/node.js.yml/badge.svg)](https://github.com/UoA-Discords/api/actions/workflows/node.js.yml)
+
 ## Installation
 
 1. Make a [Discord Application](https://discord.com/developers/applications)
