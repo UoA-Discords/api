@@ -9,18 +9,25 @@ Backend API for the UoA Discords project.
 ## Installation
 
 1. Make a [Discord Application](https://discord.com/developers/applications)
+
     - Go to the `OAuth2` > `General` section
     - Note down your **client ID** and **client secret**
     - Add a redirect URL (this can be anything), you'll need it for Discord login requests later
+
 1. Clone this repository
+
     ```sh
     git clone https://github.com/UoA-Discords/api.git
     ```
+
 1. Make sure you have NodeJS
+
     ```sh
     node -v
     ```
+
     Get it [here](https://nodejs.org/).
+
 1. Install dependencies using [yarn](https://yarnpkg.com/) or npm
 
     ```sh
@@ -32,11 +39,15 @@ Backend API for the UoA Discords project.
     ```
 
 1. Make a [config.json](./config.json) file in the root directory
+
     ```sh
     cp config.example.json config.json
     ```
-1. Fill out config values with your Discord **client ID** and **client secret** from step 1.
-    - Fill out any other values that might need changing, you can see their descriptions [here](./src/global/Config.ts).
+
+1. Fill out config values with your Discord **client ID** and **client secret** from step 1
+
+    - Fill out any other values that might need changing, you can see their descriptions [here](./src/global/Config.ts)
+
 1. Start the API in development mode using the **dev** script
 
     ```sh
