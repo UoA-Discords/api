@@ -89,8 +89,6 @@ if (existsSync(`config.json`)) {
     if (recursivelyCompareObjects(fakeConfig, actualConfig, `config.json`)) {
         console.log(`✓ config.json is valid`);
     }
-} else {
-    exitStatus = 1;
 }
 
 process.exit(exitStatus);
