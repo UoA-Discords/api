@@ -30,8 +30,11 @@ export class DatabaseManager<T extends { id: string } = { id: string }> {
         return existsSync(join(this._filePath, `${id}.json`));
     }
 
+    private static _validId = new RegExp(/^[0-9]{1,}$/);
+
     /** Gets an entry from the database. */
     public get(id: string): T | null {
+        if (!DatabaseManager._validId.test(id)) return null;
         try {
             return JSON.parse(readFileSync(join(this._filePath, `${id}.json`), `utf-8`));
         } catch (error) {
