@@ -43,8 +43,11 @@ app.set(`trust proxy`, Config.numProxies);
 {
     app.use(cors());
     app.use(express.json());
-    // applied before ratelimiting because we don't ratelimit this (and only this) endpoint
+
+    // applied before ratelimiting because we don't ratelimit these (and only these) endpoints
+    app.use(`/spec`, express.static(`openapi.json`));
     app.use(`/api-docs`, swaggerUi.serve, swaggerUi.setup(apiSpec));
+
     app.use(customRateLimiter);
     app.use(
         OpenApiValidator.middleware({
