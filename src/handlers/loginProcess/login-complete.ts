@@ -88,6 +88,10 @@ export const discordLoginComplete: RequestHandler = async (req, res) => {
                 discriminator,
                 avatar,
             };
+
+            if (discordUser.public_flags !== undefined) {
+                userData.public_flags = discordUser.public_flags;
+            }
         }
 
         // save the changes
