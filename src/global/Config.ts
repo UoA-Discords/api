@@ -52,7 +52,7 @@ export interface IConfig {
     startedAt: string;
 }
 
-export const Config: IConfig = existsSync(`../../config.json`)
+export const Config: IConfig = existsSync(`config.json`)
     ? require(`../../config.json`)
     : require(`../../config.example.json`);
 
