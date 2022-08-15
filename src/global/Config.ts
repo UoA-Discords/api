@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
+import { GuildVerificationLevel } from 'discord-api-types/v10';
+
 export interface IConfig {
     /** Port the API will listen on. */
     port: number;
@@ -5,6 +8,9 @@ export interface IConfig {
     discordClientID: string;
     discordClientSecret: string;
     discordRedirectURI: string;
+
+    /** String to sign Json Web Tokens with, do not make this easy to guess. */
+    jwtSecret: string;
 
     /**
      * Requests with any of these values in their
@@ -26,7 +32,27 @@ export interface IConfig {
      * For more information see the {@link https://www.npmjs.com/package/express-rate-limit#:~:text=Troubleshooting%20Proxy%20Issues Express Rate Limit docs}.
      */
     numProxies: number;
+
+    /** Requirements for guilds to be considered. */
+    applyRequirements: {
+        /** Guilds below this member count will be automatically denied. */
+        memberCount: number;
+        /** Guilds below this verification level will be automatically denied. */
+        verificationLevel: GuildVerificationLevel;
+    };
+
+    /**
+     * Do not include this in your `config.json` file, it is automatically read from
+     * the root `package.json` file.
+     */
+    version: string;
+
+    /** Do not include this in your `config.json` file, it is automatically created. */
+    startedAt: string;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 export const Config: IConfig = require(`../../config.json`);
+
+Config.version = process.env[`NPM_VERSION`] || require(`../../package.json`).version;
+
+Config.startedAt = new Date().toISOString();

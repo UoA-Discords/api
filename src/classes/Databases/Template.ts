@@ -30,22 +30,44 @@ export class DatabaseManager<T extends { id: string } = { id: string }> {
         return existsSync(join(this._filePath, `${id}.json`));
     }
 
-    /** Gets an entry from the database, will error if entry does not exist. */
-    public get(id: string): T {
-        return JSON.parse(readFileSync(join(this._filePath, `${id}.json`), `utf-8`));
+    /** Gets an entry from the database. */
+    public get(id: string): T | null {
+        try {
+            return JSON.parse(readFileSync(join(this._filePath, `${id}.json`), `utf-8`));
+        } catch (error) {
+            return null;
+        }
     }
 
     /** Adds or updates an entry in the database.  */
-    public set(item: T): void {
-        return writeFileSync(join(this._filePath, `${item.id}.json`), JSON.stringify(item), `utf-8`);
+    public set(...items: T[]): void {
+        for (const item of items) {
+            writeFileSync(join(this._filePath, `${item.id}.json`), JSON.stringify(item), `utf-8`);
+        }
     }
 
     /** Removes an entry from the database, will error if entry does not exist. */
-    public remove(id: string): void {
-        return rmSync(join(this._filePath, `${id}.json`));
+    public remove(...ids: string[]): void {
+        for (const id of ids) {
+            rmSync(join(this._filePath, `${id}.json`));
+        }
     }
 
     public get size(): number {
         return readdirSync(this._filePath, `utf-8`).length;
+    }
+
+    public getAll(): T[] {
+        const allItems = readdirSync(this._filePath, `utf-8`);
+        const len = allItems.length;
+
+        const output = new Array<T>(len);
+        for (let i = 0; i < len; i++) {
+            const fileName = allItems[i]!;
+            const fileId = fileName.slice(0, -5); // remove the ".json" extension
+            output[i] = this.get(fileId)!;
+        }
+
+        return output;
     }
 }

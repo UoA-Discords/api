@@ -16,5 +16,12 @@ export const Loggers = {
         /** Overwritten, expired, fulfilled, and warning state information. */
         state: new Logger(`sessions/states.log`, behaviour, devmode),
     },
+    /** Changing of permission levels. */
     permissionChanges: new Logger(`permissions.log`, behaviour, devmode),
+    entries: {
+        /** Applications, approvals, denials, and withdrawals. */
+        changes: new Logger(`entries/changes.log`, behaviour, devmode),
+        /** Opt-out requests. */
+        optouts: new Logger(`entries/optouts.log`, behaviour, devmode),
+    },
 };

@@ -3,5 +3,8 @@
   "compilerOptions": {
     "noUnusedLocals": true,
     "noUnusedParameters": true
-  }
+  },
+  "exclude": [
+    "src/**/*.test.ts"
+  ]
 }

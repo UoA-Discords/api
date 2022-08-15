@@ -1,0 +1,1193 @@
+{
+    "openapi": "3.0.3",
+    "info": {
+        "title": "UoA Discords API",
+        "description": "Backend API for the Uoa Discords project.",
+        "contact": {
+            "name": "API Support",
+            "url": "https://github.com/UoA-Discords/api"
+        },
+        "license": {
+            "name": "MIT",
+            "url": "https://github.com/UoA-Discords/api/blob/main/LICENSE"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:3001",
+            "description": "Development (Local)"
+        },
+        {
+            "url": "http://ntgc.ddns.net:5000",
+            "description": "Development (Remote)"
+        },
+        {
+            "url": "https://api.uoa-discords.com",
+            "description": "Production"
+        }
+    ],
+    "paths": {
+        "/": {
+            "get": {
+                "tags": ["Other"],
+                "description": "Checks API status, version, uptime, and other stats.<br /><br />*Permission Level: 0 (None)*",
+                "responses": {
+                    "200": {
+                        "description": "Various API information.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "required": ["version", "startedAt", "entryStats", "users", "applyRequirements"],
+                                    "properties": {
+                                        "version": {
+                                            "type": "string",
+                                            "example": "1.23.45"
+                                        },
+                                        "startedAt": {
+                                            "type": "string",
+                                            "example": "2022-08-11T07:21:52.062Z"
+                                        },
+                                        "entryStats": {
+                                            "type": "object",
+                                            "required": ["pending", "approved", "denied", "withdrawn", "optOut"],
+                                            "properties": {
+                                                "pending": {
+                                                    "type": "integer"
+                                                },
+                                                "approved": {
+                                                    "type": "integer"
+                                                },
+                                                "denied": {
+                                                    "type": "integer"
+                                                },
+                                                "withdrawn": {
+                                                    "type": "integer"
+                                                },
+                                                "optOut": {
+                                                    "type": "integer"
+                                                }
+                                            }
+                                        },
+                                        "users": {
+                                            "type": "integer"
+                                        },
+                                        "applyRequirements": {
+                                            "type": "object",
+                                            "required": ["memberCount", "verificationLevel"],
+                                            "properties": {
+                                                "memberCount": {
+                                                    "type": "number"
+                                                },
+                                                "verificationLevel": {
+                                                    "type": "number",
+                                                    "minimum": 0,
+                                                    "maximum": 4
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/429"
+                    }
+                }
+            }
+        },
+        "/ip": {
+            "get": {
+                "tags": ["Other"],
+                "description": "Returns IP address of client, useful for [configuring proxies](https://www.npmjs.com/package/express-rate-limit#:~:text=Troubleshooting%20Proxy%20Issues).<br /><br />*Permission Level: 0 (None)*",
+                "responses": {
+                    "200": {
+                        "description": "IP address of client, might be `::1` if viewing from same network.",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string",
+                                    "example": "123.123.123.123"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/429"
+                    }
+                }
+            }
+        },
+        "/discord/login-complete": {
+            "get": {
+                "tags": ["Login Process"],
+                "description": "Complete Discord OAuth2 login process, returning a Discord access token.<br /><br />*Permission Level: 1 (LikeDislike)*",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "code",
+                        "description": "OAuth2 code returned by Discord authorization endpoint.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "state",
+                        "description": "Server-specified state returned by Discord authorization endpoint.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Login successful.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/LoginResponse"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/400"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/401"
+                    },
+                    "409": {
+                        "description": "State doesn't match, possible CSRF attempt has occurred."
+                    },
+                    "410": {
+                        "description": "Unexpected (possibly expired) state. User likely waited too long to authorize."
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/429"
+                    }
+                }
+            }
+        },
+        "/discord/refresh": {
+            "get": {
+                "tags": ["Login Process"],
+                "description": "Refreshes Discord access token<br /><br />*Permission Level: 1 (LikeDislike)*",
+                "responses": {
+                    "200": {
+                        "description": "Refresh successful.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/LoginResponse"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/400"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/401"
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/429"
+                    }
+                }
+            }
+        },
+        "/discord/logout": {
+            "get": {
+                "tags": ["Login Process"],
+                "description": "Revokes Discord access token.<br /><br />*Permission Level: 0 (None)*",
+
+                "responses": {
+                    "200": {
+                        "description": "Revocation successful."
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/400"
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/429"
+                    }
+                }
+            }
+        },
+        "/discord/login": {
+            "get": {
+                "tags": ["Login Process"],
+                "description": "Makes and redirects to a Discord OAuth2 authorization URL.<br /><br />*Permission Level: 0 (None)*<br /><br />_Please note that trying out this request on Swagger will not work, you should instead try it in a browser or applications like [Postman](https://www.postman.com/) and [Insomnia](https://insomnia.rest/download)._",
+                "responses": {
+                    "302": {
+                        "description": "Redirection response.",
+                        "content": {
+                            "text/plain": {
+                                "schema": {
+                                    "type": "string",
+                                    "example": "Found. Redirecting to https://discord.com/..."
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/429"
+                    }
+                }
+            }
+        },
+        "/entries": {
+            "get": {
+                "tags": ["Core"],
+                "description": "Gets all approved entries.<br /><br />*Permission Level: 0 (None)*",
+                "responses": {
+                    "200": {
+                        "description": "All approved entries.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/BaseEntry"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/429"
+                    }
+                }
+            }
+        },
+        "/entries/{state}": {
+            "get": {
+                "tags": ["Core"],
+                "description": "Gets all entries of a certain state.<br /><br />*Permission Level: 4 (Moderator)*",
+                "parameters": [
+                    {
+                        "name": "state",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "All entries of the specified state.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/BaseEntry"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": { "$ref": "#/components/responses/400" },
+                    "401": { "$ref": "#/components/responses/401" },
+                    "429": { "$ref": "#/components/responses/429" }
+                }
+            }
+        },
+        "/entries/{state}/{id}/state": {
+            "patch": {
+                "tags": ["Entry Modification"],
+                "description": "Changes the state of an entry.<br /><br />*Permission Level: 4 (Moderator)*",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": ["newState"],
+                                "properties": {
+                                    "newState": {
+                                        "type": "number"
+                                    },
+                                    "reason": {
+                                        "type": "string",
+                                        "description": "Reason for withdrawal or denial, if doing so."
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "state",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "State updated successfully."
+                    },
+                    "204": {
+                        "description": "State was already this."
+                    },
+                    "400": { "$ref": "#/components/responses/400" },
+                    "401": { "$ref": "#/components/responses/401" },
+                    "404": { "description": "An entry with that state and ID does not exist." },
+                    "429": { "$ref": "#/components/responses/429" }
+                }
+            }
+        },
+        "/entries/{state}/{id}/tags": {
+            "patch": {
+                "tags": ["Entry Modification"],
+                "description": "Changes the tags of an entry.<br /><br />*Permission Level: 4 (Moderator)*",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": ["tags"],
+                                "properties": {
+                                    "tags": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "state",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Tags updated successfully."
+                    },
+                    "400": { "$ref": "#/components/responses/400" },
+                    "401": { "$ref": "#/components/responses/401" },
+                    "404": { "description": "An entry with that state and ID does not exist." },
+                    "429": { "$ref": "#/components/responses/429" }
+                }
+            }
+        },
+        "/entries/{state}/{id}/featured": {
+            "post": {
+                "tags": ["Entry Modification"],
+                "description": "Makes an entry featured.<br /><br />*Permission Level: 6 (Owner)*",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": ["isFeatured"],
+                                "properties": {
+                                    "isFeatured": {
+                                        "type": "boolean"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "state",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Set featured successfully."
+                    },
+                    "400": { "$ref": "#/components/responses/400" },
+                    "401": { "$ref": "#/components/responses/401" },
+                    "404": { "description": "An entry with that state and ID does not exist." },
+                    "429": { "$ref": "#/components/responses/429" }
+                }
+            }
+        },
+        "/entries/featured": {
+            "get": {
+                "tags": ["Core"],
+                "description": "Gets all featureds entries.<br /><br />*Permission Level: 4 (Moderator)*",
+                "responses": {
+                    "200": {
+                        "description": "Array of featured entries.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/BaseEntry"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": { "$ref": "#/components/responses/400" },
+                    "401": { "$ref": "#/components/responses/401" },
+                    "429": { "$ref": "#/components/responses/429" }
+                }
+            }
+        },
+        "/entries/optout": {
+            "get": {
+                "tags": ["Core"],
+                "description": "Gets all opt-out entries.<br /><br />*Permission Level: 4 (Moderator)*",
+                "responses": {
+                    "200": {
+                        "description": "Array of opt-out entries.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OptOutEntry"
+                                }
+                            }
+                        }
+                    },
+                    "400": { "$ref": "#/components/responses/400" },
+                    "401": { "$ref": "#/components/responses/401" },
+                    "429": { "$ref": "#/components/responses/429" }
+                }
+            },
+            "post": {
+                "tags": ["Entry Modification"],
+                "description": "Creates an opt-out entry.<br /><br />*Permission Level: 4 (Moderator)*",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": ["onBehalfOf", "guildId"],
+                                "description": "User ID of the admin/owner of the opt-out guild who requested the opt-out.",
+                                "type": "object",
+                                "properties": {
+                                    "onBehalfOf": {
+                                        "type": "string"
+                                    },
+                                    "guildId": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Opt-out successful."
+                    },
+                    "204": {
+                        "description": "This guild was already opted-out."
+                    },
+                    "400": { "$ref": "#/components/responses/400" },
+                    "401": { "$ref": "#/components/responses/401" },
+                    "429": { "$ref": "#/components/responses/429" }
+                }
+            },
+            "delete": {
+                "tags": ["Entry Modification"],
+                "description": "Removes an opt-out entry.<br /><br />*Permission Level: 5 (Admin)*",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "additionalProperties": false,
+                                "required": ["guildId"],
+                                "properties": {
+                                    "guildId": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Opt-out successful."
+                    },
+                    "204": {
+                        "description": "This guild was already opted-out."
+                    },
+                    "400": { "$ref": "#/components/responses/400" },
+                    "404": { "description": "An opt-out guild with that ID does not exist." },
+                    "401": { "$ref": "#/components/responses/401" },
+                    "429": { "$ref": "#/components/responses/429" }
+                }
+            }
+        },
+        "/entries/{id}/likes": {
+            "patch": {
+                "tags": ["Entry Modification"],
+                "description": "Likes, dislikes, or removes a like/dislike of an entry.<br /><br />*Permission Level: 1 (LikeDislike)*",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": ["like"],
+                                "properties": {
+                                    "like": {
+                                        "type": "number",
+                                        "minimum": -1,
+                                        "maximum": 1
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "The entry was liked/disliked successfully."
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/400"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/401"
+                    },
+                    "404": {
+                        "description": "An approved entry with that ID does not exist."
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/429"
+                    }
+                }
+            }
+        },
+        "/users": {
+            "get": {
+                "description": "Gets all users.<br /><br />*Permission Level: 4 (Moderator)*",
+                "tags": ["User Management"],
+                "responses": {
+                    "200": {
+                        "description": "Array of all users.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/SiteUser"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/400"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/401"
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/429"
+                    }
+                }
+            }
+        },
+        "/users/{id}/perms": {
+            "patch": {
+                "tags": ["User Management"],
+                "description": "Modifies the permission level of a user.<br /><br />*Permission Level: 5 (Admin)*",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": ["newPermissionLevel"],
+                                "properties": {
+                                    "newPermissionLevel": {
+                                        "type": "number",
+                                        "example": 0
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "User updated successfully."
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/400"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/401"
+                    },
+                    "404": {
+                        "description": "A user with that ID does not exist."
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/429"
+                    }
+                }
+            }
+        },
+        "/entries/pending/me": {
+            "get": {
+                "tags": ["Core"],
+                "description": "Gets pending applications of current user.<br /><br />*Permission Level: 0 (None)*",
+                "responses": {
+                    "200": {
+                        "description": "Array of pending applications made by the client.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/BaseEntry"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/400"
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/429"
+                    }
+                }
+            }
+        },
+        "/apply": {
+            "post": {
+                "tags": ["Core"],
+                "description": "Makes a server application.<br /><br />*Permission Level: 2 (Default)*",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": ["inviteCode", "tags"],
+                                "properties": {
+                                    "inviteCode": {
+                                        "type": "string"
+                                    },
+                                    "tags": {
+                                        "type": "array",
+                                        "nullable": true,
+                                        "items": {
+                                            "type": "number"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Application made successfully."
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/400"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/401"
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/429"
+                    }
+                }
+            }
+        },
+        "/api-docs": {
+            "get": {
+                "tags": ["Other"],
+                "description": "Gets this document! Note that this is the only endpoint that is not ratelimited.<br /><br />*Permission Level: 0 (None)*",
+                "security": [],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "description": "This document."
+                    }
+                }
+            }
+        },
+        "/staff": {
+            "get": {
+                "tags": ["User Management"],
+                "description": "Gets a list of all staff members.<br /><br />*Permission Level: 0 (None)*",
+                "responses": {
+                    "200": {
+                        "description": "List of moderators, admins, and owners.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "required": ["moderators", "admins", "owners"],
+                                    "type": "object",
+                                    "properties": {
+                                        "moderators": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/SiteUser"
+                                            }
+                                        },
+                                        "admins": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/SiteUser"
+                                            }
+                                        },
+                                        "owners": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/SiteUser"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/429"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "LoginResponse": {
+                "type": "object",
+                "description": "Object returned from a successful login or refresh request.",
+                "required": ["discordAuth", "siteAuth"],
+                "properties": {
+                    "discordAuth": {
+                        "$ref": "#/components/schemas/AccessTokenResponse"
+                    },
+                    "siteAuth": {
+                        "type": "string",
+                        "description": "JsonWebToken to use for any elevated requests to this API."
+                    },
+                    "userData": {
+                        "$ref": "#/components/schemas/SiteUser"
+                    }
+                }
+            },
+            "AccessTokenResponse": {
+                "type": "object",
+                "description": "Object returned from a Discord OAuth2 token routes, see the official [Discord API docs](https://discord.com/developers/docs/topics/oauth2#authorization-code-grant-access-token-response) for more info.",
+                "required": ["access_token", "token_type", "expires_in", "refresh_token", "scope"],
+                "properties": {
+                    "access_token": {
+                        "type": "string"
+                    },
+                    "token_type": {
+                        "type": "string",
+                        "default": "Bearer"
+                    },
+                    "expires_in": {
+                        "type": "integer",
+                        "description": "How long, in seconds, until the returned access token expires.",
+                        "default": 604800
+                    },
+                    "refresh_token": {
+                        "type": "string"
+                    },
+                    "scope": {
+                        "type": "string",
+                        "default": "identify guilds"
+                    }
+                }
+            },
+            "SiteUser": {
+                "type": "object",
+                "description": "Some of the user data stored on the server, the first 5 properties are from the [Discord API user object](https://discord.com/developers/docs/resources/user#user-object).",
+                "required": [
+                    "id",
+                    "username",
+                    "discriminator",
+                    "avatar",
+                    "firstLogin",
+                    "lastLogin",
+                    "permissionLevel",
+                    "applicationStats"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "User's Discord ID."
+                    },
+                    "username": {
+                        "type": "string"
+                    },
+                    "discriminator": {
+                        "type": "string"
+                    },
+                    "avatar": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "public_flags": {
+                        "type": "integer"
+                    },
+                    "firstLogin": {
+                        "type": "string",
+                        "example": "2022-08-11T05:22:42.140Z"
+                    },
+                    "lastLogin": {
+                        "type": "string",
+                        "example": "2022-08-11T05:22:42.140Z",
+                        "description": "ISO timestamp of last login or refresh of this user."
+                    },
+                    "permissionLevel": {
+                        "type": "number"
+                    },
+                    "applicationStats": {
+                        "type": "object",
+                        "required": ["applied", "approved", "denied", "withdrawn"],
+                        "description": "Statistics of entries created by this user, always current.",
+                        "properties": {
+                            "applied": {
+                                "type": "number"
+                            },
+                            "approved": {
+                                "type": "number"
+                            },
+                            "denied": {
+                                "type": "number"
+                            },
+                            "withdrawn": {
+                                "type": "number"
+                            }
+                        }
+                    }
+                }
+            },
+            "FeaturedData": {
+                "type": "object",
+                "required": ["featuredById", "featuredSince"],
+                "properties": {
+                    "featuredById": {
+                        "type": "string"
+                    },
+                    "featuredAt": {
+                        "type": "string",
+                        "example": "2022-08-11T05:22:42.140Z"
+                    }
+                }
+            },
+            "BaseEntry": {
+                "type": "object",
+                "required": [
+                    "id",
+                    "state",
+                    "inviteCode",
+                    "guildData",
+                    "memberCountHistory",
+                    "createdById",
+                    "createdAt",
+                    "likes",
+                    "dislikes",
+                    "facultyTags"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "state": {
+                        "type": "integer",
+                        "description": "Pending(0), Approved(1), Denied(2), or Withdrawn (3)"
+                    },
+                    "inviteCode": {
+                        "type": "string",
+                        "example": "ABC123"
+                    },
+                    "guildData": {
+                        "type": "object",
+                        "description": "See the official [Discord API docs](https://discord.com/developers/docs/resources/guild#guild-object) for more info."
+                    },
+                    "memberCountHistory": {
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        }
+                    },
+                    "createdById": {
+                        "type": "string"
+                    },
+                    "createdAt": {
+                        "type": "string",
+                        "example": "2022-08-11T05:22:42.140Z"
+                    },
+                    "likes": {
+                        "type": "integer"
+                    },
+                    "dislikes": {
+                        "type": "integer"
+                    },
+                    "facultyTags": {
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        }
+                    },
+                    "featuredData": {
+                        "$ref": "#/components/schemas/FeaturedData"
+                    }
+                }
+            },
+            "ApprovedEntry": {
+                "allOf": [{ "$ref": "#/components/schemas/BaseEntry" }],
+                "required": ["approvedById", "approvedAt"],
+                "properties": {
+                    "approvedById": {
+                        "type": "string"
+                    },
+                    "approvedAt": {
+                        "type": "string",
+                        "example": "2022-08-11T05:22:42.140Z"
+                    }
+                }
+            },
+            "DeniedEntry": {
+                "allOf": [{ "$ref": "#/components/schemas/BaseEntry" }],
+                "required": ["deniedById", "deniedAt"],
+                "properties": {
+                    "deniedById": {
+                        "type": "string"
+                    },
+                    "deniedAt": {
+                        "type": "string",
+                        "example": "2022-08-11T05:22:42.140Z"
+                    },
+                    "reason": {
+                        "type": "string",
+                        "example": "not UoA specific"
+                    }
+                }
+            },
+            "WithdrawnEntry": {
+                "allOf": [{ "$ref": "#/components/schemas/BaseEntry" }],
+                "required": ["withdrawnById", "withdrawnAt"],
+                "properties": {
+                    "withdrawnById": {
+                        "type": "string"
+                    },
+                    "withdrawnAtId": {
+                        "type": "string",
+                        "example": "2022-08-11T05:22:42.140Z"
+                    }
+                }
+            },
+            "OptOutEntry": {
+                "required": ["id", "optedOutBy", "doneBy", "doneAt"],
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "optedOutBy": {
+                        "type": "string"
+                    },
+                    "doneBy": {
+                        "type": "string"
+                    },
+                    "doneAt": {
+                        "type": "string",
+                        "example": "2022-08-11T05:22:42.140Z"
+                    }
+                }
+            }
+        },
+        "responses": {
+            "400": {
+                "description": "Bad request.",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "required": ["shortMessage", "longMessage", "fixMessage"],
+                            "properties": {
+                                "shortMessage": {
+                                    "type": "string",
+                                    "nullable": true,
+                                    "example": "Invalid Access Token"
+                                },
+                                "longMessage": {
+                                    "type": "string",
+                                    "nullable": true,
+                                    "example": "An invalid access_token was provided in the \"Authorization\" header."
+                                },
+                                "fixMessage": {
+                                    "type": "string",
+                                    "nullable": true,
+                                    "example": "Log out, then log back into the website."
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "401": {
+                "description": "Unauthorized.",
+                "headers": {
+                    "Perms-RequiredLevel": {
+                        "required": true,
+                        "description": "Required permission level to do this action.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    "Perms-CurrentLevel": {
+                        "required": true,
+                        "description": "Current permission level of user, will be the default permission level (2) if user could not be authenticated.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                }
+            },
+            "429": {
+                "description": "Too many requests, rate limited. All endpoints give the following headers.",
+                "headers": {
+                    "RateLimit-Limit": {
+                        "required": true,
+                        "description": "Maximum number of requests per time window.",
+                        "schema": {
+                            "type": "number"
+                        }
+                    },
+                    "RateLimit-Remaining": {
+                        "required": true,
+                        "description": "Number of requests remaining in this time window.",
+                        "schema": {
+                            "type": "number"
+                        }
+                    },
+                    "RateLimit-Reset": {
+                        "required": true,
+                        "description": "Number of seconds until this time window ends.",
+                        "schema": {
+                            "type": "number"
+                        }
+                    },
+                    "Retry-After": {
+                        "required": true,
+                        "description": "Length of time window in seconds.",
+                        "schema": {
+                            "type": "number"
+                        }
+                    }
+                }
+            }
+        },
+        "securitySchemes": {
+            "siteToken": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT",
+                "description": "JWT signed by server, contains Discord access token and user ID."
+            },
+            "rateLimitBypassToken": {
+                "type": "apiKey",
+                "description": "Token for bypassing ratelimits.",
+                "name": "RateLimit-Bypass-Token",
+                "in": "header"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Core",
+            "description": "Operations that can usually be done by anyone, and pertain to core site functionality."
+        },
+        {
+            "name": "Entry Modification",
+            "description": "Operations on existing entries, most of these (besides like) require a permission level of 4 (Moderator) or above."
+        },
+        {
+            "name": "Login Process",
+            "description": "Operations for logging in to the site via Discord. These endpoints usually require a permission level of 1 (LikeDislike) or above."
+        },
+        {
+            "name": "User Management",
+            "description": "Operations to get all users, or modify existing users permission levels, these endpoints usually require a permission level of 5 (Admin) or above."
+        },
+        {
+            "name": "Other",
+            "description": "Miscellaneous operations."
+        }
+    ],
+    "security": [{}, { "siteToken": [] }, { "rateLimitBypassToken": [] }]
+}
