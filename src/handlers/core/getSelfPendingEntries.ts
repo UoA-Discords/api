@@ -16,7 +16,7 @@ export const getSelfPendingEntries: RequestHandler = (req, res) => {
 
     const allPending = EntriesDatabases[EntryStates.Pending].getAll();
 
-    const myPending = allPending.filter((e) => e.createdById === token.user.id);
+    const myPending = allPending.filter((e) => e.createdBy.id === token.user.id);
 
     return res.status(200).json(myPending);
 };

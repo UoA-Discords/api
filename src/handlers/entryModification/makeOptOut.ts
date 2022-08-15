@@ -39,7 +39,13 @@ export const makeOptOut: RequestHandler = (req, res) => {
     OptOutDatabase.set({
         id: guildId,
         optedOutBy: onBehalfOf,
-        doneBy: staffMember.id,
+        doneBy: {
+            id: staffMember.id,
+            username: staffMember.username,
+            discriminator: staffMember.discriminator,
+            avatar: staffMember.avatar,
+            permissionLevel: staffMember.permissionLevel,
+        },
         doneAt: new Date().toISOString(),
     });
 

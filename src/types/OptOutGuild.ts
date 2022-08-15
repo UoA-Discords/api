@@ -1,3 +1,5 @@
+import { BasicUserInfo } from '../shared/Types/User';
+
 export interface OptOutGuild {
     /** Discord guild ID. */
     id: string;
@@ -6,7 +8,7 @@ export interface OptOutGuild {
     optedOutBy: string;
 
     /** Site moderator who facilitated this request. */
-    doneBy: string;
+    doneBy: BasicUserInfo;
 
     doneAt: string;
 }

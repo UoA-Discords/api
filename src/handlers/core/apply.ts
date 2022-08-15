@@ -5,8 +5,8 @@ import { validateSiteToken } from '../../functions/siteTokenFunctions';
 import { validateTagsArray } from '../../functions/validateTagsArray';
 import { Config } from '../../global/Config';
 import { validateDiscordInvite } from '../../shared/functions';
-import { EntryFacultyTags, EntryStates } from '../../shared/Types/Entries';
-import { UserPermissionLevels } from '../../shared/Types/User';
+import { EntryFacultyTags, EntryStates, PendingEntry } from '../../shared/Types/Entries';
+import { BasicUserInfo, UserPermissionLevels } from '../../shared/Types/User';
 
 export const apply: RequestHandler = async (req, res) => {
     const token = validateSiteToken(req.get(`Authorization`));
@@ -114,18 +114,54 @@ export const apply: RequestHandler = async (req, res) => {
     token.user.applicationStats.applied++;
     UserDatabase.set(token.user);
 
-    EntriesDatabases[EntryStates.Pending].set({
+    const createdBy: BasicUserInfo = {
+        id: token.user.id,
+        username: token.user.username,
+        discriminator: token.user.discriminator,
+        avatar: token.user.avatar,
+        permissionLevel: token.user.permissionLevel,
+    };
+
+    const newEntry: PendingEntry = {
         state: EntryStates.Pending,
         id: guild.id,
         inviteCode: inviteCode,
         guildData: guild,
         memberCountHistory: [],
-        createdById: token.user.id,
+        createdBy,
         createdAt: new Date().toISOString(),
         likes: 0,
         dislikes: 0,
         facultyTags: tags,
-    });
+    };
+
+    if (
+        inviteValidation.invite.approximate_member_count !== undefined &&
+        inviteValidation.invite.approximate_presence_count !== undefined
+    ) {
+        newEntry.memberCountHistory.push([
+            inviteValidation.invite.approximate_presence_count,
+            inviteValidation.invite.approximate_member_count,
+        ]);
+    }
+
+    if (inviteValidation.invite.inviter !== undefined) {
+        const inviteCreator = inviteValidation.invite.inviter;
+        if (inviteCreator.id === createdBy.id) {
+            newEntry.inviteCreatedBy = createdBy;
+        } else {
+            const relevantUser = UserDatabase.get(inviteCreator.id);
+            newEntry.createdBy = {
+                id: inviteCreator.id,
+                username: inviteCreator.username,
+                discriminator: inviteCreator.discriminator,
+                avatar: inviteCreator.avatar,
+                permissionLevel: relevantUser?.permissionLevel ?? UserPermissionLevels.Default,
+            };
+        }
+    }
+
+    EntriesDatabases[EntryStates.Pending].set(newEntry);
 
     Loggers.entries.changes.log(
         `[Pending] ${token.user.username}#${token.user.discriminator} made an application for ${guild.name} (code = ${inviteCode})`,

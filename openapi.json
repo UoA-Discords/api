@@ -938,14 +938,36 @@
             },
             "FeaturedData": {
                 "type": "object",
-                "required": ["featuredById", "featuredSince"],
+                "required": ["featuredBy", "featuredSince"],
                 "properties": {
-                    "featuredById": {
-                        "type": "string"
+                    "featuredBy": {
+                        "$ref": "#/components/schemas/BasicUserInfo"
                     },
                     "featuredAt": {
                         "type": "string",
                         "example": "2022-08-11T05:22:42.140Z"
+                    }
+                }
+            },
+            "BasicUserInfo": {
+                "description": "Basic user information, used to display a user without having to make more API calls to get their full profile (if it exists).",
+                "type": "object",
+                "required": ["id", "username", "discriminator", "avatar", "permissionLevel"],
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "username": {
+                        "type": "string"
+                    },
+                    "discriminator": {
+                        "type": "string"
+                    },
+                    "avatar": {
+                        "type": "string"
+                    },
+                    "permissionLevel": {
+                        "type": "integer"
                     }
                 }
             },
@@ -957,7 +979,7 @@
                     "inviteCode",
                     "guildData",
                     "memberCountHistory",
-                    "createdById",
+                    "createdBy",
                     "createdAt",
                     "likes",
                     "dislikes",
@@ -969,11 +991,14 @@
                     },
                     "state": {
                         "type": "integer",
-                        "description": "Pending(0), Approved(1), Denied(2), or Withdrawn (3)"
+                        "description": "Pending(0), Approved(1), Denied(2), or Withdrawn(3)"
                     },
                     "inviteCode": {
                         "type": "string",
                         "example": "ABC123"
+                    },
+                    "inviteCreatedBy": {
+                        "$ref": "#/components/schemas/BasicUserInfo"
                     },
                     "guildData": {
                         "type": "object",
@@ -982,11 +1007,18 @@
                     "memberCountHistory": {
                         "type": "array",
                         "items": {
-                            "type": "integer"
+                            "type": "array",
+                            "nullable": true,
+                            "minItems": 2,
+                            "maxItems": 2,
+                            "items": {
+                                "type": "integer",
+                                "description": "Tuple of [online, total] members in the server."
+                            }
                         }
                     },
-                    "createdById": {
-                        "type": "string"
+                    "createdBy": {
+                        "$ref": "#/components/schemas/BasicUserInfo"
                     },
                     "createdAt": {
                         "type": "string",
@@ -1011,10 +1043,10 @@
             },
             "ApprovedEntry": {
                 "allOf": [{ "$ref": "#/components/schemas/BaseEntry" }],
-                "required": ["approvedById", "approvedAt"],
+                "required": ["approvedBy", "approvedAt"],
                 "properties": {
-                    "approvedById": {
-                        "type": "string"
+                    "approvedBy": {
+                        "$ref": "#/components/schemas/BasicUserInfo"
                     },
                     "approvedAt": {
                         "type": "string",
@@ -1024,10 +1056,10 @@
             },
             "DeniedEntry": {
                 "allOf": [{ "$ref": "#/components/schemas/BaseEntry" }],
-                "required": ["deniedById", "deniedAt"],
+                "required": ["deniedBy", "deniedAt", "reason"],
                 "properties": {
-                    "deniedById": {
-                        "type": "string"
+                    "deniedBy": {
+                        "$ref": "#/components/schemas/BasicUserInfo"
                     },
                     "deniedAt": {
                         "type": "string",
@@ -1041,10 +1073,10 @@
             },
             "WithdrawnEntry": {
                 "allOf": [{ "$ref": "#/components/schemas/BaseEntry" }],
-                "required": ["withdrawnById", "withdrawnAt"],
+                "required": ["withdrawnBy", "withdrawnAt"],
                 "properties": {
-                    "withdrawnById": {
-                        "type": "string"
+                    "withdrawnBy": {
+                        "$ref": "#/components/schemas/BasicUserInfo"
                     },
                     "withdrawnAtId": {
                         "type": "string",
@@ -1062,7 +1094,7 @@
                         "type": "string"
                     },
                     "doneBy": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/BasicUserInfo"
                     },
                     "doneAt": {
                         "type": "string",

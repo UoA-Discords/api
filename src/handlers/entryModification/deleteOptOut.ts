@@ -40,17 +40,17 @@ export const deleteOptOut: RequestHandler = (req, res) => {
 
     OptOutDatabase.remove(guild.id);
 
-    const doneBy = UserDatabase.get(guild.doneBy);
     const behalfOf = UserDatabase.get(guild.optedOutBy);
 
-    const doneByLog = doneBy !== null ? `${doneBy.username}#${doneBy.discriminator}` : guild.doneBy.toString();
     const behalfOfLog =
         behalfOf !== null ? `${behalfOf.username}#${behalfOf.discriminator}` : guild.optedOutBy.toString();
 
     Loggers.entries.optouts.log(
         `${staffMember.username}#${staffMember.discriminator} removed ${guildId} (added on ${new Date(
             guild.doneAt,
-        ).toLocaleDateString(`en-NZ`)} by ${doneByLog} on behalf of ${behalfOfLog})`,
+        ).toLocaleDateString(`en-NZ`)} by ${guild.doneBy.username}#${
+            guild.doneBy.discriminator
+        } on behalf of ${behalfOfLog})`,
     );
 
     return res.sendStatus(200);

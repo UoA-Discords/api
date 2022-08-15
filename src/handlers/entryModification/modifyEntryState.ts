@@ -3,21 +3,27 @@ import { EntriesDatabases, UserDatabase } from '../../classes/Databases';
 import { Loggers } from '../../classes/Loggers';
 import { validateSiteToken } from '../../functions/siteTokenFunctions';
 import { ApprovedEntry, BaseEntry, DeniedEntry, Entry, EntryStates, WithdrawnEntry } from '../../shared/Types/Entries';
-import { UserPermissionLevels } from '../../shared/Types/User';
+import { BasicUserInfo, UserPermissionLevels } from '../../shared/Types/User';
 
 function duplicateEntry(entry: Entry): BaseEntry {
-    return {
+    const newEntry: BaseEntry = {
         id: entry.id,
         state: entry.state,
         inviteCode: entry.inviteCode,
         guildData: entry.guildData,
         memberCountHistory: entry.memberCountHistory,
-        createdById: entry.createdById,
+        createdBy: entry.createdBy,
         createdAt: entry.createdAt,
         likes: entry.likes,
         dislikes: entry.dislikes,
         facultyTags: entry.facultyTags,
     };
+
+    if (entry.inviteCreatedBy !== undefined) {
+        newEntry.inviteCreatedBy = entry.inviteCreatedBy;
+    }
+
+    return newEntry;
 }
 
 export const modifyEntryState: RequestHandler = (req, res) => {
@@ -93,7 +99,7 @@ export const modifyEntryState: RequestHandler = (req, res) => {
         });
     }
 
-    const user = UserDatabase.get(entry.createdById);
+    const user = UserDatabase.get(entry.createdBy.id);
     if (user === null) {
         return res.status(400).json({
             shortMessage: `Invalid User`,
@@ -120,12 +126,20 @@ export const modifyEntryState: RequestHandler = (req, res) => {
 
     EntriesDatabases[currentState].remove(entry.id);
 
+    const actionUserInfo: BasicUserInfo = {
+        id: token.user.id,
+        username: token.user.username,
+        discriminator: token.user.discriminator,
+        avatar: token.user.avatar,
+        permissionLevel: token.user.permissionLevel,
+    };
+
     switch (newState) {
         case EntryStates.Approved: {
             user.applicationStats.approved++;
             const newEntry: ApprovedEntry = {
                 ...duplicateEntry(entry),
-                approvedById: token.user.id,
+                approvedBy: actionUserInfo,
                 approvedAt: new Date().toISOString(),
                 state: EntryStates.Approved,
             };
@@ -136,7 +150,7 @@ export const modifyEntryState: RequestHandler = (req, res) => {
             user.applicationStats.denied++;
             const newEntry: DeniedEntry = {
                 ...duplicateEntry(entry),
-                deniedById: token.user.id,
+                deniedBy: actionUserInfo,
                 deniedAt: new Date().toISOString(),
                 state: EntryStates.Denied,
                 reason: reason as string,
@@ -148,7 +162,7 @@ export const modifyEntryState: RequestHandler = (req, res) => {
             user.applicationStats.withdrawn++;
             const newEntry: WithdrawnEntry = {
                 ...duplicateEntry(entry),
-                withdrawnById: token.user.id,
+                withdrawnBy: actionUserInfo,
                 withdrawnAt: new Date().toISOString(),
                 state: EntryStates.Withdrawn,
                 reason: reason as string,

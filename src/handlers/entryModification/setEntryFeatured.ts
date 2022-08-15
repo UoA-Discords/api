@@ -64,7 +64,13 @@ export const setEntryFeatured: RequestHandler = (req, res) => {
         delete entry.featured;
     } else {
         entry.featured = {
-            featuredById: token.user.id,
+            featuredBy: {
+                id: token.user.id,
+                username: token.user.username,
+                discriminator: token.user.discriminator,
+                avatar: token.user.avatar,
+                permissionLevel: token.user.permissionLevel,
+            },
             featuredSince: new Date().toISOString(),
         };
     }
