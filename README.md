@@ -9,7 +9,7 @@ Backend API for the UoA Discords project.
 ## Installation
 
 1. Make a [Discord Application](https://discord.com/developers/applications)
-    - Go to the `Oconfig2` > `General` section
+    - Go to the `OAuth2` > `General` section
     - Note down your **client ID** and **client secret**
     - Add a redirect URL (this can be anything), you'll need it for Discord login requests later
 1. Clone this repository
