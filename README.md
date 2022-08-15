@@ -1,4 +1,4 @@
-# Uoa-Discords/API
+# UoA-Discords/API
 
 Backend API for the UoA Discords project.
 
