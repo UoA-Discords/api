@@ -94,7 +94,7 @@ export const modifyEntryState: RequestHandler = (req, res) => {
     if (newState === EntryStates.Pending) {
         return res.status(400).json({
             shortMessage: `Invalid State`,
-            longMessage: `Cannot set an entries state to pending (${EntryStates.Pending}).`,
+            longMessage: `Cannot set the state of an entry to pending (${EntryStates.Pending}).`,
             fixMessage: `Choose another entry state.`,
         });
     }
@@ -108,21 +108,7 @@ export const modifyEntryState: RequestHandler = (req, res) => {
         });
     }
 
-    // update user stats
-    switch (currentState) {
-        case EntryStates.Approved:
-            user.applicationStats.approved--;
-            break;
-        case EntryStates.Denied:
-            user.applicationStats.denied--;
-            break;
-        case EntryStates.Pending:
-            user.applicationStats.applied--;
-            break;
-        case EntryStates.Withdrawn:
-            user.applicationStats.withdrawn--;
-            break;
-    }
+    user.myApplicationStats[currentState]--;
 
     EntriesDatabases[currentState].remove(entry.id);
 
@@ -134,9 +120,10 @@ export const modifyEntryState: RequestHandler = (req, res) => {
         permissionLevel: token.user.permissionLevel,
     };
 
+    user.myApplicationStats[newState]++;
+
     switch (newState) {
         case EntryStates.Approved: {
-            user.applicationStats.approved++;
             const newEntry: ApprovedEntry = {
                 ...duplicateEntry(entry),
                 approvedBy: actionUserInfo,
@@ -147,7 +134,6 @@ export const modifyEntryState: RequestHandler = (req, res) => {
             break;
         }
         case EntryStates.Denied: {
-            user.applicationStats.denied++;
             const newEntry: DeniedEntry = {
                 ...duplicateEntry(entry),
                 deniedBy: actionUserInfo,
@@ -159,7 +145,6 @@ export const modifyEntryState: RequestHandler = (req, res) => {
             break;
         }
         case EntryStates.Withdrawn: {
-            user.applicationStats.withdrawn++;
             const newEntry: WithdrawnEntry = {
                 ...duplicateEntry(entry),
                 withdrawnBy: actionUserInfo,
@@ -173,6 +158,10 @@ export const modifyEntryState: RequestHandler = (req, res) => {
     }
 
     UserDatabase.set(user);
+
+    // update the staff members stats
+    token.user.myAdminStats[newState]++;
+    UserDatabase.set(token.user);
 
     Loggers.entries.changes.log(
         `[${EntryStates[currentState]} -> ${EntryStates[newState]}] ${token.user.username}#${token.user.discriminator} updated ${entry.guildData.name} (code = ${entry.inviteCode}, id = ${entry.id})`,

@@ -10,7 +10,7 @@ export const getSelfPendingEntries: RequestHandler = (req, res) => {
         return res.status(400).json(token.reason);
     }
 
-    if (token.user.applicationStats.applied === 0) {
+    if (token.user.myApplicationStats[EntryStates.Pending] === 0) {
         return res.status(200).json([]);
     }
 

@@ -882,7 +882,8 @@
                     "firstLogin",
                     "lastLogin",
                     "permissionLevel",
-                    "applicationStats"
+                    "myApplicationStats",
+                    "myAdminStats"
                 ],
                 "additionalProperties": false,
                 "properties": {
@@ -915,21 +916,37 @@
                     "permissionLevel": {
                         "type": "number"
                     },
-                    "applicationStats": {
+                    "myApplicationStats": {
                         "type": "object",
-                        "required": ["applied", "approved", "denied", "withdrawn"],
-                        "description": "Statistics of entries created by this user, always current.",
+                        "required": ["0", "1", "2", "3"],
+                        "description": "Number of applications this user currently has, indexed by entry state.",
                         "properties": {
-                            "applied": {
+                            "0": {
                                 "type": "number"
                             },
-                            "approved": {
+                            "1": {
                                 "type": "number"
                             },
-                            "denied": {
+                            "2": {
                                 "type": "number"
                             },
-                            "withdrawn": {
+                            "3": {
+                                "type": "number"
+                            }
+                        }
+                    },
+                    "myAdminStats": {
+                        "type": "object",
+                        "required": ["1", "2", "3"],
+                        "description": "Number of entry state modifications this user has made, indexed by entry state changed to.",
+                        "properties": {
+                            "1": {
+                                "type": "number"
+                            },
+                            "2": {
+                                "type": "number"
+                            },
+                            "3": {
                                 "type": "number"
                             }
                         }

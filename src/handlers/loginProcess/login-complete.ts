@@ -6,6 +6,7 @@ import { SiteUser, UserPermissionLevels } from '../../shared/Types/User';
 import { UserDatabase } from '../../classes/Databases';
 import { getUserInfo } from '../../shared/DiscordAPI';
 import { makeSiteToken } from '../../functions/siteTokenFunctions';
+import { EntryStates } from '../../shared/Types/Entries';
 
 /** Completes the Discord login process by upgrading an authorization code to an access token. */
 export const discordLoginComplete: RequestHandler = async (req, res) => {
@@ -75,11 +76,16 @@ export const discordLoginComplete: RequestHandler = async (req, res) => {
                 firstLogin: new Date().toISOString(),
                 lastLogin: new Date().toISOString(),
                 permissionLevel: UserPermissionLevels.Default,
-                applicationStats: {
-                    applied: 0,
-                    approved: 0,
-                    denied: 0,
-                    withdrawn: 0,
+                myApplicationStats: {
+                    [EntryStates.Pending]: 0,
+                    [EntryStates.Approved]: 0,
+                    [EntryStates.Denied]: 0,
+                    [EntryStates.Withdrawn]: 0,
+                },
+                myAdminStats: {
+                    [EntryStates.Approved]: 0,
+                    [EntryStates.Denied]: 0,
+                    [EntryStates.Withdrawn]: 0,
                 },
                 likes: [],
                 dislikes: [],

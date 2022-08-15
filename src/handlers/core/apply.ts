@@ -23,7 +23,7 @@ export const apply: RequestHandler = async (req, res) => {
     }
     if (token.user.permissionLevel === UserPermissionLevels.Default) {
         // default = max of 1 pending
-        if (token.user.applicationStats.applied >= 1) {
+        if (token.user.myApplicationStats[EntryStates.Pending] >= 1) {
             return res.status(400).json({
                 shortMessage: `Application Limit Reached`,
                 longMessage: `You have reached your limit of pending server applications (1).`,
@@ -32,7 +32,7 @@ export const apply: RequestHandler = async (req, res) => {
         }
     } else if (token.user.permissionLevel === UserPermissionLevels.Elevated) {
         // elevated = max of 10 pending
-        if (token.user.applicationStats.applied >= 10) {
+        if (token.user.myApplicationStats[EntryStates.Pending] >= 10) {
             return res.status(400).json({
                 shortMessage: `Application Limit Reached`,
                 longMessage: `You have reached your limit of pending server applications (10).`,
@@ -111,7 +111,7 @@ export const apply: RequestHandler = async (req, res) => {
         });
     }
 
-    token.user.applicationStats.applied++;
+    token.user.myApplicationStats[EntryStates.Pending]++;
     UserDatabase.set(token.user);
 
     const createdBy: BasicUserInfo = {
