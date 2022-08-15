@@ -27,6 +27,7 @@ export class DatabaseManager<T extends { id: string } = { id: string }> {
 
     /** Checks if an entry exists in the database. */
     public has(id: string): boolean {
+        if (!DatabaseManager._validId.test(id)) return false;
         return existsSync(join(this._filePath, `${id}.json`));
     }
 
