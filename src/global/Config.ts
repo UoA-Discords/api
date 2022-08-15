@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { GuildVerificationLevel } from 'discord-api-types/v10';
+import { existsSync } from 'fs';
 
 export interface IConfig {
     /** Port the API will listen on. */
@@ -51,7 +52,9 @@ export interface IConfig {
     startedAt: string;
 }
 
-export const Config: IConfig = require(`../../config.json`);
+export const Config: IConfig = existsSync(`../../config.json`)
+    ? require(`../../config.json`)
+    : require(`../../config.example.json`);
 
 Config.version = process.env[`NPM_VERSION`] || require(`../../package.json`).version;
 
