@@ -901,7 +901,21 @@
                         "description": "JsonWebToken to use for any elevated requests to this API."
                     },
                     "userData": {
-                        "$ref": "#/components/schemas/SiteUser"
+                        "allOf": [{ "$ref": "#/components/schemas/SiteUser" }],
+                        "required": ["ip", "likes", "dislikes"],
+                        "properties": {
+                            "ip": {
+                                "type": "string"
+                            },
+                            "likes": {
+                                "type": "array",
+                                "items": { "type": "string" }
+                            },
+                            "dislikes": {
+                                "type": "array",
+                                "items": { "type": "string" }
+                            }
+                        }
                     }
                 }
             },

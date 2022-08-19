@@ -107,10 +107,5 @@ export const discordLoginComplete: RequestHandler = async (req, res) => {
     // create site access token from Discord access token
     const siteAuth = makeSiteToken(discordAuth, userData.id);
 
-    const partial = userData as Partial<SiteUser>;
-    delete partial.ip;
-    delete partial.likes;
-    delete partial.dislikes;
-
-    return res.status(200).json({ discordAuth, siteAuth, userData: partial });
+    return res.status(200).json({ discordAuth, siteAuth, userData });
 };
