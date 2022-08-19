@@ -252,7 +252,7 @@
                                 "schema": {
                                     "type": "array",
                                     "items": {
-                                        "$ref": "#/components/schemas/BaseEntry"
+                                        "$ref": "#/components/schemas/ApprovedEntry"
                                     }
                                 }
                             }
@@ -646,6 +646,46 @@
                 }
             }
         },
+        "/users/{id}": {
+            "get": {
+                "description": "Gets a user by the given ID.<br /><br />*Permission Level: 4 (Moderator)*",
+                "tags": ["User Management"],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The user.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SiteUser"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/400"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/401"
+                    },
+                    "404": {
+                        "description": "User with that ID does not exist."
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/429"
+                    }
+                }
+            }
+        },
         "/users/{id}/perms": {
             "patch": {
                 "tags": ["User Management"],
@@ -851,6 +891,7 @@
                 "type": "object",
                 "description": "Object returned from a successful login or refresh request.",
                 "required": ["discordAuth", "siteAuth"],
+                "additionalProperties": false,
                 "properties": {
                     "discordAuth": {
                         "$ref": "#/components/schemas/AccessTokenResponse"
@@ -868,6 +909,7 @@
                 "type": "object",
                 "description": "Object returned from a Discord OAuth2 token routes, see the official [Discord API docs](https://discord.com/developers/docs/topics/oauth2#authorization-code-grant-access-token-response) for more info.",
                 "required": ["access_token", "token_type", "expires_in", "refresh_token", "scope"],
+                "additionalProperties": false,
                 "properties": {
                     "access_token": {
                         "type": "string"
@@ -969,12 +1011,27 @@
                                 "type": "number"
                             }
                         }
+                    },
+                    "ip": {
+                        "type": "string",
+                        "description": "IP address of this user, only available to owner."
+                    },
+                    "likes": {
+                        "type": "array",
+                        "items": { "type": "string" },
+                        "description": "List of guild IDs that this user has liked, only available to admins or above."
+                    },
+                    "dislikes": {
+                        "type": "array",
+                        "items": { "type": "string" },
+                        "description": "List of guild IDs that this user has disliked, only available to admins or above."
                     }
                 }
             },
             "FeaturedData": {
                 "type": "object",
                 "required": ["featuredBy", "featuredSince"],
+                "additionalProperties": false,
                 "properties": {
                     "featuredBy": {
                         "$ref": "#/components/schemas/BasicUserInfo"
@@ -989,6 +1046,7 @@
                 "description": "Basic user information, used to display a user without having to make more API calls to get their full profile (if it exists).",
                 "type": "object",
                 "required": ["id", "username", "discriminator", "avatar", "permissionLevel"],
+                "additionalProperties": false,
                 "properties": {
                     "id": {
                         "type": "string"

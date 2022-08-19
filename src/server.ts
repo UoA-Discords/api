@@ -14,7 +14,7 @@ import { customErrorHandler } from './middleware/customErrorHandler';
 import { customRateLimiter } from './middleware/customRateLimiter';
 import { EntryStates } from './shared/Types/Entries';
 import { discordLogin, discordLoginComplete, discordLogout, discordRefresh } from './handlers/loginProcess';
-import { getAllStaff, getAllUsers, patchUserPerms } from './handlers/userManagement';
+import { getAllStaff, getAllUsers, getUserById, patchUserPerms } from './handlers/userManagement';
 import {
     deleteOptOut,
     likeEntry,
@@ -79,6 +79,7 @@ app.set(`trust proxy`, Config.numProxies);
 
     // user management
     app.get(`/staff`, getAllStaff);
+    app.get(`/users/:id`, getUserById);
     app.patch(`/users/:id/perms`, patchUserPerms);
     app.get(`/users`, getAllUsers);
 
