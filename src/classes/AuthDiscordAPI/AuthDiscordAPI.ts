@@ -2,13 +2,6 @@ import axios from 'axios';
 import { OAuth2Routes, RESTPostOAuth2AccessTokenResult, UserFlags } from 'discord-api-types/v10';
 import { Config } from '../../global/Config';
 import { SiteUser } from '../../shared/Types/User';
-import { Loggers } from '../Loggers';
-
-export interface IpWaitingState {
-    state: string;
-    timeout: NodeJS.Timeout;
-}
-
 /**
  * Provides helper functions to various Discord handlers to:
  * - Construct and send OAuth requests.
@@ -16,8 +9,6 @@ export interface IpWaitingState {
  * - Log session activity.
  */
 export abstract class AuthDiscordAPI {
-    private static readonly _ipStateMap: Record<string, IpWaitingState> = {};
-
     private static makeRequestBody(): URLSearchParams {
         const params = new URLSearchParams();
         params.set(`client_id`, Config.discordClientID);
@@ -71,42 +62,6 @@ export abstract class AuthDiscordAPI {
 
         const { data } = await axios.post<boolean>(OAuth2Routes.tokenRevocationURL, body);
         return data;
-    }
-
-    /** If the IP already exists in the record, it is overwritten. */
-    public static addWaitingState(ip: string, state: string): void {
-        const existing = this._ipStateMap[ip];
-        if (existing !== undefined) {
-            Loggers.sessions.state.log(`[Overwritten] ${ip} (${existing.state} -> ${state})`);
-            existing.timeout.refresh();
-            existing.state = state;
-        } else {
-            this._ipStateMap[ip] = {
-                state,
-                timeout: setTimeout(() => this.removeWaitingState_Automatic(ip), 1000 * 60 * 5),
-            };
-        }
-    }
-
-    /**
-     * State gets removed after the configured timeout threshold,
-     * meaning the user did not authorize in time.
-     */
-    private static removeWaitingState_Automatic(ip: string): void {
-        Loggers.sessions.state.log(`[Expired] ${ip} (${this._ipStateMap[ip]?.state})`);
-        clearTimeout(this._ipStateMap[ip]?.timeout);
-        delete this._ipStateMap[ip];
-    }
-
-    /** Manual state removal, for when a matching state and IP is received. */
-    public static removeWaitingState(ip: string): void {
-        Loggers.sessions.state.log(`[Fulfilled] ${ip} (${this._ipStateMap[ip]?.state})`);
-        clearTimeout(this._ipStateMap[ip]?.timeout);
-        delete this._ipStateMap[ip];
-    }
-
-    public static getWaitingState(ip: string): string | undefined {
-        return this._ipStateMap[ip]?.state;
     }
 
     /**

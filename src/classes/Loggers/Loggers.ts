@@ -13,8 +13,6 @@ export const Loggers = {
     sessions: {
         /** Logins, logouts, and refreshes. */
         main: new Logger(`sessions/main.log`, behaviour, devmode),
-        /** Overwritten, expired, fulfilled, and warning state information. */
-        state: new Logger(`sessions/states.log`, behaviour, devmode),
     },
     /** Changing of permission levels. */
     permissionChanges: new Logger(`permissions.log`, behaviour, devmode),

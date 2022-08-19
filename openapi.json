@@ -120,24 +120,36 @@
                 }
             }
         },
-        "/discord/login-complete": {
+        "/discord/example": {
             "get": {
                 "tags": ["Login Process"],
-                "description": "Complete Discord OAuth2 login process, returning a Discord access token.<br /><br />*Permission Level: 1 (LikeDislike)*",
+                "description": "Returns an example Discord OAuth2 authorization link creation function.",
+                "responses": {
+                    "200": {
+                        "description": "Source code.",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/429"
+                    }
+                }
+            }
+        },
+        "/discord/login": {
+            "get": {
+                "tags": ["Login Process"],
+                "description": "Complete the Discord OAuth2 login process, returning a Discord access token.<br /><br />*Permission Level: 1 (LikeDislike)*",
                 "parameters": [
                     {
                         "in": "query",
                         "name": "code",
                         "description": "OAuth2 code returned by Discord authorization endpoint.",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "in": "query",
-                        "name": "state",
-                        "description": "Server-specified state returned by Discord authorization endpoint.",
                         "required": true,
                         "schema": {
                             "type": "string"
@@ -160,12 +172,6 @@
                     },
                     "401": {
                         "$ref": "#/components/responses/401"
-                    },
-                    "409": {
-                        "description": "State doesn't match, possible CSRF attempt has occurred."
-                    },
-                    "410": {
-                        "description": "Unexpected (possibly expired) state. User likely waited too long to authorize."
                     },
                     "429": {
                         "$ref": "#/components/responses/429"
@@ -211,28 +217,6 @@
                     },
                     "400": {
                         "$ref": "#/components/responses/400"
-                    },
-                    "429": {
-                        "$ref": "#/components/responses/429"
-                    }
-                }
-            }
-        },
-        "/discord/login": {
-            "get": {
-                "tags": ["Login Process"],
-                "description": "Makes and redirects to a Discord OAuth2 authorization URL.<br /><br />*Permission Level: 0 (None)*<br /><br />_Please note that trying out this request on Swagger will not work, you should instead try it in a browser or applications like [Postman](https://www.postman.com/) and [Insomnia](https://insomnia.rest/download)._",
-                "responses": {
-                    "302": {
-                        "description": "Redirection response.",
-                        "content": {
-                            "text/plain": {
-                                "schema": {
-                                    "type": "string",
-                                    "example": "Found. Redirecting to https://discord.com/..."
-                                }
-                            }
-                        }
                     },
                     "429": {
                         "$ref": "#/components/responses/429"
