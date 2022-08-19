@@ -767,7 +767,7 @@
         "/api-docs": {
             "get": {
                 "tags": ["Other"],
-                "description": "Gets this document! Note that this is one of the only 2 endpoints that are not ratelimited.<br /><br />*Permission Level: 0 (None)*",
+                "description": "Gets this document. Note that this is one of the only 2 endpoints that are not ratelimited.<br /><br />*Permission Level: 0 (None)*",
                 "security": [],
                 "responses": {
                     "200": {
@@ -786,7 +786,7 @@
         "/spec": {
             "get": {
                 "tags": ["Other"],
-                "description": "Gets the underlying JSON data that is displayed in this document! Note that this is one of the only 2 endpoints that are not ratelimited.<br /><br />*Permission Level: 0 (None)*",
+                "description": "Gets the underlying JSON data that is displayed in this document. Note that this is one of the only 2 endpoints that are not ratelimited.<br /><br />*Permission Level: 0 (None)*",
                 "security": [],
                 "responses": {
                     "200": {
