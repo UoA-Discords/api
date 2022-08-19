@@ -1,7 +1,8 @@
 import { RequestHandler } from 'express';
 import { UserDatabase } from '../../classes/Databases';
+import { removeUserData } from '../../functions/removeUserData';
 import { validateSiteToken } from '../../functions/siteTokenFunctions';
-import { SiteUser, UserPermissionLevels } from '../../shared/Types/User';
+import { UserPermissionLevels } from '../../shared/Types/User';
 
 export const getAllUsers: RequestHandler = (req, res) => {
     const token = validateSiteToken(req.get(`Authorization`));
@@ -17,13 +18,10 @@ export const getAllUsers: RequestHandler = (req, res) => {
         return res.sendStatus(401);
     }
 
-    return res.status(200).json(
-        UserDatabase.getAll().map((e) => {
-            const partial = e as Partial<SiteUser>;
-            delete partial.ip;
-            delete partial.likes;
-            delete partial.dislikes;
-            return partial;
-        }),
-    );
+    const users = UserDatabase.getAll();
+    users.forEach((user) => {
+        removeUserData(user, token.user.permissionLevel);
+    });
+
+    return res.status(200).json(users);
 };
