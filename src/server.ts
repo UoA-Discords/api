@@ -86,7 +86,7 @@ app.set(`trust proxy`, Config.numProxies);
     // login process
     app.get(`/discord/logout`, discordLogout);
     app.get(`/discord/refresh`, discordRefresh);
-    app.get(`/discord/login`, discordLogin);
+    app.post(`/discord/login`, discordLogin);
     app.use(`/discord/example`, express.static(join(`src`, `handlers`, `loginProcess`, `example.html`)));
 
     // entry modification

@@ -23,10 +23,10 @@ export abstract class AuthDiscordAPI {
      * @returns {RESTPostOAuth2AccessTokenResult} Access token information.
      * @throws Throws an error if the provided code is invalid.
      */
-    public static async getToken(code: string): Promise<RESTPostOAuth2AccessTokenResult> {
+    public static async getToken(code: string, redirectUri: string): Promise<RESTPostOAuth2AccessTokenResult> {
         const body = this.makeRequestBody();
         body.set(`code`, code);
-        body.set(`redirect_uri`, Config.discordRedirectURI);
+        body.set(`redirect_uri`, redirectUri);
         body.set(`grant_type`, `authorization_code`);
 
         const { data } = await axios.post<RESTPostOAuth2AccessTokenResult>(OAuth2Routes.tokenURL, body);

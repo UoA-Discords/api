@@ -9,7 +9,6 @@ const _fakeConfig: Omit<IConfig, `version` | `startedAt`> = {
     port: 0,
     discordClientID: ``,
     discordClientSecret: ``,
-    discordRedirectURI: ``,
     rateLimitBypassTokens: [],
     maxRequestsPerMinute: 0,
     numProxies: 0,

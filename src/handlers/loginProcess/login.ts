@@ -10,10 +10,10 @@ import { EntryStates } from '../../shared/Types/Entries';
 
 /** Completes the Discord login process by upgrading an authorization code to an access token. */
 export const discordLogin: RequestHandler = async (req, res) => {
-    const { code } = req.query;
+    const { code, redirect_uri } = req.body;
 
     // basic input validation, should be done by express-openapi-validator, but just in case
-    if (typeof code !== `string`) {
+    if (typeof code !== `string` || typeof redirect_uri !== `string`) {
         return res.sendStatus(400);
     }
 
@@ -22,11 +22,11 @@ export const discordLogin: RequestHandler = async (req, res) => {
 
     // get Discord access token from code
     try {
-        discordAuth = await AuthDiscordAPI.getToken(code);
+        discordAuth = await AuthDiscordAPI.getToken(code, redirect_uri);
     } catch (error) {
         return res.status(400).json({
-            shortMessage: `Invalid Auth Code`,
-            longMessage: `An invalid authorization code was provided in the query.`,
+            shortMessage: `Invalid Body`,
+            longMessage: `An invalid authorization code or redirect URI was provided in the query.`,
             fixMessage: `Log in again.`,
         });
     }

@@ -8,7 +8,6 @@ export interface IConfig {
 
     discordClientID: string;
     discordClientSecret: string;
-    discordRedirectURI: string;
 
     /** String to sign Json Web Tokens with, do not make this easy to guess. */
     jwtSecret: string;
