@@ -10,7 +10,7 @@ export const getAllUsers: RequestHandler = (req, res) => {
         return res.status(400).json(token.reason);
     }
 
-    // 2. check user has permission to get all users
+    // check user has permission to get all users
     if (token.user.permissionLevel < UserPermissionLevels.Moderator) {
         res.setHeader(`Perms-RequiredLevel`, UserPermissionLevels.Moderator);
         res.setHeader(`Perms-CurrentLevel`, token.user.permissionLevel);
