@@ -142,20 +142,28 @@
             }
         },
         "/discord/login": {
-            "get": {
+            "post": {
                 "tags": ["Login Process"],
                 "description": "Complete the Discord OAuth2 login process, returning a Discord access token.<br /><br />*Permission Level: 1 (LikeDislike)*",
-                "parameters": [
-                    {
-                        "in": "query",
-                        "name": "code",
-                        "description": "OAuth2 code returned by Discord authorization endpoint.",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": ["code", "redirect_uri"],
+                                "properties": {
+                                    "code": {
+                                        "type": "string",
+                                        "description": "OAuth2 code returned by Discord authorization endpoint."
+                                    },
+                                    "redirect_uri": {
+                                        "type": "string"
+                                    }
+                                },
+                                "additionalProperties": false
+                            }
                         }
                     }
-                ],
+                },
                 "responses": {
                     "200": {
                         "description": "Login successful.",

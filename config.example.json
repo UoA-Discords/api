@@ -2,7 +2,6 @@
     "port": 3001,
     "discordClientID": "my_client_id",
     "discordClientSecret": "my_client_secret",
-    "discordRedirectURI": "http://localhost:3001/discord/login-complete",
     "jwtSecret": "aSuperSecretString",
     "rateLimitBypassTokens": [],
     "maxRequestsPerMinute": 30,
