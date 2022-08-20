@@ -13,7 +13,7 @@ export function discordLoginExample(): string {
     params.set(`response_type`, `code`);
     params.set(`client_id`, Config.discordClientID);
     params.set(`state`, state);
-    params.set(`redirect_uri`, Config.discordRedirectURI);
+    params.set(`redirect_uri`, `https://uoa-discords.com/login`);
     params.set(`prompt`, `consent`);
     params.set(`scope`, SCOPES.join(` `));
 
