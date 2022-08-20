@@ -20,7 +20,6 @@ export const getAllStaff: RequestHandler = (_req, res) => {
             const partial = user as Partial<SiteUser>;
             delete partial.ip;
             delete partial.likes;
-            delete partial.dislikes;
         }
     }
 

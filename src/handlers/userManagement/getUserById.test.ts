@@ -27,7 +27,6 @@ describe(`getUserById`, () => {
             [EntryStates.Withdrawn]: 0,
         },
         likes: [],
-        dislikes: [],
         username: ``,
         discriminator: ``,
         avatar: null,

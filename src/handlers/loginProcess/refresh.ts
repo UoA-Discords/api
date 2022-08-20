@@ -17,8 +17,8 @@ export const discordRefresh: RequestHandler = async (req, res) => {
     let discordAuth: RESTPostOAuth2AccessTokenResult;
 
     // check user has permission to refresh
-    if (token.user.permissionLevel < UserPermissionLevels.LikeDislike) {
-        res.setHeader(`Perms-RequiredLevel`, UserPermissionLevels.LikeDislike);
+    if (token.user.permissionLevel < UserPermissionLevels.Like) {
+        res.setHeader(`Perms-RequiredLevel`, UserPermissionLevels.Like);
         res.setHeader(`Perms-CurrentLevel`, token.user.permissionLevel);
         return res.sendStatus(401);
     }

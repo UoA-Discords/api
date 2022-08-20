@@ -80,7 +80,6 @@ export const discordLogin: RequestHandler = async (req, res) => {
                     [EntryStates.Withdrawn]: 0,
                 },
                 likes: [],
-                dislikes: [],
                 id,
                 username,
                 discriminator,

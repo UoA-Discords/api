@@ -15,7 +15,6 @@ function duplicateEntry(entry: Entry): BaseEntry {
         createdBy: entry.createdBy,
         createdAt: entry.createdAt,
         likes: entry.likes,
-        dislikes: entry.dislikes,
         facultyTags: entry.facultyTags,
     };
 

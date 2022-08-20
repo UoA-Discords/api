@@ -131,7 +131,6 @@ export const apply: RequestHandler = async (req, res) => {
         createdBy,
         createdAt: new Date().toISOString(),
         likes: 0,
-        dislikes: 0,
         facultyTags: tags,
     };
 

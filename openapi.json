@@ -144,7 +144,7 @@
         "/discord/login": {
             "post": {
                 "tags": ["Login Process"],
-                "description": "Complete the Discord OAuth2 login process, returning a Discord access token.<br /><br />*Permission Level: 1 (LikeDislike)*",
+                "description": "Complete the Discord OAuth2 login process, returning a Discord access token.<br /><br />*Permission Level: 1 (Like)*",
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -190,7 +190,7 @@
         "/discord/refresh": {
             "get": {
                 "tags": ["Login Process"],
-                "description": "Refreshes Discord access token<br /><br />*Permission Level: 1 (LikeDislike)*",
+                "description": "Refreshes Discord access token<br /><br />*Permission Level: 1 (Like)*",
                 "responses": {
                     "200": {
                         "description": "Refresh successful.",
@@ -561,7 +561,7 @@
         "/entries/{id}/likes": {
             "patch": {
                 "tags": ["Entry Modification"],
-                "description": "Likes, dislikes, or removes a like/dislike of an entry.<br /><br />*Permission Level: 1 (LikeDislike)*",
+                "description": "Likes, or removes a like of an entry.<br /><br />*Permission Level: 1 (Like)*",
                 "parameters": [
                     {
                         "name": "id",
@@ -580,9 +580,7 @@
                                 "required": ["like"],
                                 "properties": {
                                     "like": {
-                                        "type": "number",
-                                        "minimum": -1,
-                                        "maximum": 1
+                                        "type": "boolean"
                                     }
                                 }
                             }
@@ -591,7 +589,7 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "The entry was liked/disliked successfully."
+                        "description": "The entry was (un)liked successfully."
                     },
                     "400": {
                         "$ref": "#/components/responses/400"
@@ -894,16 +892,12 @@
                     },
                     "userData": {
                         "allOf": [{ "$ref": "#/components/schemas/SiteUser" }],
-                        "required": ["ip", "likes", "dislikes"],
+                        "required": ["ip", "likes"],
                         "properties": {
                             "ip": {
                                 "type": "string"
                             },
                             "likes": {
-                                "type": "array",
-                                "items": { "type": "string" }
-                            },
-                            "dislikes": {
                                 "type": "array",
                                 "items": { "type": "string" }
                             }
@@ -1026,11 +1020,6 @@
                         "type": "array",
                         "items": { "type": "string" },
                         "description": "List of guild IDs that this user has liked, only available to admins or above."
-                    },
-                    "dislikes": {
-                        "type": "array",
-                        "items": { "type": "string" },
-                        "description": "List of guild IDs that this user has disliked, only available to admins or above."
                     }
                 }
             },
@@ -1082,7 +1071,6 @@
                     "createdBy",
                     "createdAt",
                     "likes",
-                    "dislikes",
                     "facultyTags"
                 ],
                 "properties": {
@@ -1125,9 +1113,6 @@
                         "example": "2022-08-11T05:22:42.140Z"
                     },
                     "likes": {
-                        "type": "integer"
-                    },
-                    "dislikes": {
                         "type": "integer"
                     },
                     "facultyTags": {
@@ -1310,7 +1295,7 @@
         },
         {
             "name": "Login Process",
-            "description": "Operations for logging in to the site via Discord. These endpoints usually require a permission level of 1 (LikeDislike) or above."
+            "description": "Operations for logging in to the site via Discord. These endpoints usually require a permission level of 1 (Like) or above."
         },
         {
             "name": "User Management",

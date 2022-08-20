@@ -13,7 +13,6 @@ export function removeUserData(user: SiteUser, permissionLevel: UserPermissionLe
 
         if (permissionLevel < UserPermissionLevels.Administrator) {
             delete partial.likes;
-            delete partial.dislikes;
         }
     }
 }
