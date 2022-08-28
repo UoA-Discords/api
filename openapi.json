@@ -23,7 +23,7 @@
             "description": "Development (Remote)"
         },
         {
-            "url": "https://api.uoa-discords.com",
+            "url": "https://bpi.uoa-discords.com",
             "description": "Production"
         }
     ],
