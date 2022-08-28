@@ -42,7 +42,17 @@ app.set(`trust proxy`, Config.numProxies);
 
 // normal middleware
 {
-    app.use(cors({ exposedHeaders: [`RateLimit-Limit`, `RateLimit-Remaining`, `RateLimit-Reset`, `Retry-After`] }));
+    app.use(
+        cors({
+            exposedHeaders: [
+                `RateLimit-Limit`,
+                `RateLimit-Remaining`,
+                `RateLimit-Reset`,
+                `Retry-After`,
+                `RateLimit-Bypass-Response`,
+            ],
+        }),
+    );
     app.use(express.json());
     // applied before ratelimiting because we don't ratelimit these (and only these) endpoints
     app.use(`/spec`, express.static(`openapi.json`));
