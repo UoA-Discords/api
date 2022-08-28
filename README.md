@@ -8,76 +8,45 @@ Backend API for the UoA Discords project.
 
 ## Installation
 
-1. Make a [Discord Application](https://discord.com/developers/applications)
+Make sure you have the following dependencies installed:
+
+-   [NodeJS](https://nodejs.org/), any version >= 16 should work. Lower versions have not been tested.
+
+-   [yarn](https://yarnpkg.com/) (can be installed using `npm i -g yarn`), not strictly required but strongly recommended (and some scripts may not work without it).
+
+-   [git](https://git-scm.com/), should be installed already (via NodeJS).
+
+1. First make a [Discord Application](https://discord.com/developers/applications)
 
     - Go to the `OAuth2` > `General` section
     - Note down your **client ID** and **client secret**
     - Add a redirect URL (this can be anything), you'll need it for Discord login requests later
 
-1. Clone this repository
+2. Now you can run the following in a terminal:
 
-    ```sh
-    git clone https://github.com/UoA-Discords/api.git
-    ```
+```sh
+git clone https://github.com/UoA-Discords/api.git uoa-discords-api
+cd uoa-discords-api
+git submodule init
+git submodule update
+yarn install # or npm install
+yarn build # or npm run build
+cp config.example.json config.json
+```
 
-1. Make sure you have NodeJS
-
-    ```sh
-    node -v
-    ```
-
-    Get it [here](https://nodejs.org/).
-
-1. Install dependencies using [yarn](https://yarnpkg.com/) or npm
-
-    ```sh
-    yarn
-    ```
-
-    ```sh
-    npm install
-    ```
-
-1. Make a [config.json](./config.json) file in the root directory
-
-    ```sh
-    cp config.example.json config.json
-    ```
-
-1. Fill out config values with your Discord **client ID** and **client secret** from step 1
+3. Next fill out config values with your Discord **client ID** and **client secret** from step 1
 
     - Fill out any other values that might need changing, you can see their descriptions [here](./src/global/Config.ts)
 
-1. Start the API in development mode using the **dev** script
+You can now run the API using `node .` or `yarn start` in a terminal.
 
-    ```sh
-    yarn dev
-    ```
+## Script Reference
 
-    ```sh
-    npm run dev
-    ```
-
-1. Make a production build using the **build** script
-
-    ```sh
-    yarn build
-    ```
-
-    ```sh
-    npm run build
-    ```
-
-1. Start the API in production mode using the **start** script
-
-    ```sh
-    node .
-    ```
-
-    ```sh
-    yarn start
-    ```
-
-    ```sh
-    npm run start
-    ```
+-   `yarn dev` Starts the application with hot-reloading enabled.
+-   `yarn start` Starts the production-ready build of the application.
+-   `yarn lint` Runs eslint and Prettier linting rules on the source files.
+-   `yarn build` Creates a production-ready build in the **build/** directory.
+-   `yarn typecheck` Runs TSC typechecking on the source files.
+-   `yarn check:config` Validates your **config.json** and **config.example.json** file with the expected interface.
+-   `yarn test` Runs Jest testing on the application.
+-   `yarn check-all` Runs linting, typechecking, and testing.
