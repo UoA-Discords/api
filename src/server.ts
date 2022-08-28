@@ -65,7 +65,7 @@ app.set(`trust proxy`, Config.numProxies);
             version: Config.version,
             startedAt: Config.startedAt,
             entryStats: {
-                pending: UserDatabase.size,
+                pending: EntriesDatabases[EntryStates.Pending].size,
                 approved: EntriesDatabases[EntryStates.Approved].size,
                 denied: EntriesDatabases[EntryStates.Denied].size,
                 withdrawn: EntriesDatabases[EntryStates.Withdrawn].size,
