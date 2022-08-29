@@ -16,6 +16,12 @@
         "build": "tsc -p tsconfig.build.json",
         "typecheck": "tsc -p tsconfig.build.json --noEmit",
         "check:config": "ts-node scripts/validateConfig.ts",
+        "integrity:adminStats": "ts-node scripts/integrity/adminStats.ts",
+        "integrity:applicationStats": "ts-node scripts/integrity/applicationStats.ts",
+        "integrity:likes": "ts-node scripts/integrity/likes.ts",
+        "integrity:tags": "ts-node scripts/integrity/tags.ts",
+        "integrity:users": "ts-node scripts/integrity/usersExist.ts",
+        "integrity:all": "yarn integrity:adminStats && yarn integrity:applicationStats && yarn integrity:likes && yarn integrity:tags && yarn integrity:users",
         "test": "jest",
         "check-all": "yarn lint && yarn typecheck && yarn test"
     },
