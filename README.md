@@ -50,3 +50,4 @@ You can now run the API using `node .` or `yarn start` in a terminal.
 -   `yarn check:config` Validates your **config.json** and **config.example.json** file with the expected interface.
 -   `yarn test` Runs Jest testing on the application.
 -   `yarn check-all` Runs linting, typechecking, and testing.
+-   `yarn integrity:*` Runs custom scripts for checking validity of data in the **data/** directory.
