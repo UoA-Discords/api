@@ -1,10 +1,15 @@
 import { GuildVerificationLevel } from 'discord-api-types/v10';
 import { existsSync } from 'fs';
 import { IConfig } from '../src/global/Config';
+import { Colours } from '../src/types/Colours';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const exampleConfig = require(`../config.example.json`);
 
+/**
+ * A fake config implements the Config interface, meaning we know it definitely is the right shape,
+ * and so can be used to validate `config.example.json`.
+ */
 const _fakeConfig: Omit<IConfig, `version` | `startedAt`> = {
     port: 0,
     discordClientID: ``,
@@ -19,8 +24,17 @@ const _fakeConfig: Omit<IConfig, `version` | `startedAt`> = {
     jwtSecret: ``,
 };
 
+// typescript does weird stuff with indexes, to avoid this our comparison function
+// works with Record<string, unknown>, so we typecast the fake config here.
 const fakeConfig = _fakeConfig as unknown as Record<string, unknown>;
 
+/**
+ * Checks whether all the keys of an object are also in the other, and the value types are the same.
+ * @param target Object to check.
+ * @param ideal Object that has the "correct" keys.
+ * @param targetName Name of target object, for logging.
+ * @returns {boolean} Whether keys and value types are identical.
+ */
 function recursivelyCompareObjects(
     target: Record<string, unknown>,
     ideal: Record<string, unknown>,
@@ -77,7 +91,7 @@ function recursivelyCompareObjects(
 let exitStatus = 0;
 
 if (recursivelyCompareObjects(fakeConfig, exampleConfig, `config.example.json`)) {
-    console.log(`✓ config.example.json is valid`);
+    console.log(`${Colours.FgGreen}✓ config.example.json is valid${Colours.Reset}`);
 } else {
     exitStatus = 1;
 }
@@ -86,7 +100,9 @@ if (existsSync(`config.json`)) {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const actualConfig = require(`../config.json`);
     if (recursivelyCompareObjects(fakeConfig, actualConfig, `config.json`)) {
-        console.log(`✓ config.json is valid`);
+        console.log(`${Colours.FgGreen}✓ config.json is valid${Colours.Reset}`);
+    } else {
+        exitStatus = 1;
     }
 }
 

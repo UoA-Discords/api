@@ -61,14 +61,18 @@ export class DatabaseManager<T extends { id: string } = { id: string }> {
         return readdirSync(this._filePath, `utf-8`).length;
     }
 
+    public getAllKeys(): string[] {
+        // the '.slice()' removes the '.json' extension
+        return readdirSync(this._filePath, `utf-8`).map((e) => e.slice(0, -5));
+    }
+
     public getAll(): T[] {
-        const allItems = readdirSync(this._filePath, `utf-8`);
+        const allItems = this.getAllKeys();
         const len = allItems.length;
 
         const output = new Array<T>(len);
         for (let i = 0; i < len; i++) {
-            const fileName = allItems[i]!;
-            const fileId = fileName.slice(0, -5); // remove the ".json" extension
+            const fileId = allItems[i]!;
             output[i] = this.get(fileId)!;
         }
 
