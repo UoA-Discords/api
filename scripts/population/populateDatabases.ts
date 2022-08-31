@@ -4,7 +4,7 @@ import { BasicUserInfo, SiteUser, UserPermissionLevels } from '../../src/shared/
 import { makeRandomUser } from './helpers/userGen';
 import { ApprovedEntry, DeniedEntry, EntryStates, PendingEntry, WithdrawnEntry } from '../../src/shared/Types/Entries';
 import { randomDate, randomIp } from './helpers/genHelpers';
-import { makeRandomEntry } from './entryGen';
+import { makeRandomEntry } from './helpers/entryGen';
 
 const userParams: Record<UserPermissionLevels, number> = {
     [UserPermissionLevels.None]: 3,
