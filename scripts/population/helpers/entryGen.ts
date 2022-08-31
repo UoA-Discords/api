@@ -1,6 +1,6 @@
-import { BaseEntry, Entry } from '../../src/shared/Types/Entries';
-import { BasicUserInfo, SiteUser } from '../../src/shared/Types/User';
-import { randomDate, randomId } from './helpers/genHelpers';
+import { BaseEntry, Entry } from '../../../src/shared/Types/Entries';
+import { BasicUserInfo, SiteUser } from '../../../src/shared/Types/User';
+import { randomDate, randomId } from './genHelpers';
 
 /** Randomly generates a syntactically valid invide code (a-z, A-Z, 0-9). */
 function randomInviteCode(): string {
