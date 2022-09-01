@@ -81,10 +81,7 @@ export abstract class AuthDiscordAPI {
         siteUser.ip = ip;
         siteUser.username = discordUser.username;
         siteUser.discriminator = discordUser.discriminator;
-
-        if (discordUser.avatar !== null) {
-            siteUser.avatar = discordUser.avatar;
-        }
+        siteUser.avatar = discordUser.avatar;
 
         if (discordUser.public_flags !== undefined) {
             siteUser.public_flags = discordUser.public_flags;
