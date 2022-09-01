@@ -77,7 +77,7 @@ export const apply: RequestHandler = async (req, res) => {
     // make sure we dont have this guild in any of our databases already
     {
         for (const _state in EntriesDatabases) {
-            const state = _state as unknown as EntryStates;
+            const state = Number(_state) as EntryStates;
             if (EntriesDatabases[state].has(inviteValidation.id)) {
                 return res.status(400).json({
                     shortMessage: `Already ${EntryStates[state]}`,
