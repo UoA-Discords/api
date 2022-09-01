@@ -1,5 +1,62 @@
 import { randomBytes } from 'crypto';
 
+const adjectives = [
+    `broken`,
+    `expensive`,
+    `capricious`,
+    `idiotic`,
+    `apathetic`,
+    `roasted`,
+    `sudden`,
+    `elastic`,
+    `outgoing`,
+    `jolly`,
+    `chief`,
+    `abrasive`,
+    `ripe`,
+    `quixotic`,
+    `tan`,
+    `homely`,
+    `giant`,
+    `wry`,
+    `repulsive`,
+    `unbiased`,
+];
+
+const adjLen = adjectives.length;
+export function randomAdjective(): string {
+    return adjectives[Math.floor(Math.random() * adjLen)]!;
+}
+
+const nounLen = adjectives.length;
+
+const nouns = [
+    `dirt`,
+    `candidate`,
+    `solution`,
+    `inflation`,
+    `awareness`,
+    `understanding`,
+    `growth`,
+    `employee`,
+    `tale`,
+    `painting`,
+    `news`,
+    `housing`,
+    `marriage`,
+    `sector`,
+    `ratio`,
+    `initative`,
+    `variation`,
+    `editor`,
+    `confusion`,
+    `grandmother`,
+];
+
+export function randomNoun(): string {
+    return nouns[Math.floor(Math.random() * nounLen)]!;
+}
+
 /** Randomly generates a valid Snowflake ID. */
 export function randomId(length: number = 18): string {
     const output = new Array<string>(length);
