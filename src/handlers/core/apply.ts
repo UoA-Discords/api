@@ -59,11 +59,12 @@ export const apply: RequestHandler = async (req, res) => {
         });
     }
 
-    const inviteValidation = await validateDiscordInvite({
+    const inviteValidation = await validateDiscordInvite(
         inviteCode,
-        minMemberCount: Config.applyRequirements.memberCount,
-        minVerificationLevel: Config.applyRequirements.verificationLevel,
-    });
+        Config.applyRequirements.memberCount,
+        Config.applyRequirements.verificationLevel,
+        UserDatabase.get,
+    );
 
     if (!inviteValidation.valid) {
         return res.status(400).json({
@@ -73,42 +74,26 @@ export const apply: RequestHandler = async (req, res) => {
         });
     }
 
-    const guild = inviteValidation.invite.guild;
+    // make sure we dont have this guild in any of our databases already
+    {
+        for (const _state in EntriesDatabases) {
+            const state = Number(_state) as EntryStates;
+            if (EntriesDatabases[state].has(inviteValidation.id)) {
+                return res.status(400).json({
+                    shortMessage: `Already ${EntryStates[state]}`,
+                    longMessage: `This server is already registered, with state ${EntryStates[state]} (${state}).`,
+                    fixMessage: null,
+                });
+            }
+        }
 
-    if (EntriesDatabases[EntryStates.Pending].has(guild.id)) {
-        return res.status(400).json({
-            shortMessage: `Already Applied`,
-            longMessage: `An application for this server already exists.`,
-            fixMessage: null,
-        });
-    }
-    if (EntriesDatabases[EntryStates.Approved].has(guild.id)) {
-        return res.status(400).json({
-            shortMessage: `Already Registered`,
-            longMessage: `This server is already registered on UoA Discords.`,
-            fixMessage: null,
-        });
-    }
-    if (EntriesDatabases[EntryStates.Denied].has(guild.id)) {
-        return res.status(400).json({
-            shortMessage: `Already Denied`,
-            longMessage: `This server has been denied registry from a moderator.`,
-            fixMessage: null,
-        });
-    }
-    if (EntriesDatabases[EntryStates.Withdrawn].has(guild.id)) {
-        return res.status(400).json({
-            shortMessage: `Already Withdrawn`,
-            longMessage: `This server has been withdrawn from UoA Discords by a moderator.`,
-            fixMessage: null,
-        });
-    }
-    if (OptOutDatabase.has(guild.id)) {
-        return res.status(400).json({
-            shortMessage: `Opted Out`,
-            longMessage: `This server's staff have opted-out of the registry.`,
-            fixMessage: `Discuss this with the server's staff.`,
-        });
+        if (OptOutDatabase.has(inviteValidation.id)) {
+            return res.status(400).json({
+                shortMessage: `Opted Out`,
+                longMessage: `This server's staff have opted-out of the registry.`,
+                fixMessage: `Discuss this with the server's staff.`,
+            });
+        }
     }
 
     token.user.myApplicationStats[EntryStates.Pending]++;
@@ -123,47 +108,22 @@ export const apply: RequestHandler = async (req, res) => {
     };
 
     const newEntry: PendingEntry = {
+        id: inviteValidation.id,
         state: EntryStates.Pending,
-        id: guild.id,
         inviteCode: inviteCode,
-        guildData: guild,
-        memberCountHistory: [],
+        inviteCreatedBy: inviteValidation.inviteCreatedBy,
+        guildData: inviteValidation.guildData,
+        memberCountHistory: [[inviteValidation.onlineMembers, inviteValidation.totalMembers]],
         createdBy,
         createdAt: new Date().toISOString(),
         likes: 0,
         facultyTags: tags,
     };
 
-    if (
-        inviteValidation.invite.approximate_member_count !== undefined &&
-        inviteValidation.invite.approximate_presence_count !== undefined
-    ) {
-        newEntry.memberCountHistory.push([
-            inviteValidation.invite.approximate_presence_count,
-            inviteValidation.invite.approximate_member_count,
-        ]);
-    }
-
-    if (inviteValidation.invite.inviter !== undefined) {
-        const inviteCreator = inviteValidation.invite.inviter;
-        if (inviteCreator.id === createdBy.id) {
-            newEntry.inviteCreatedBy = createdBy;
-        } else {
-            const relevantUser = UserDatabase.get(inviteCreator.id);
-            newEntry.createdBy = {
-                id: inviteCreator.id,
-                username: inviteCreator.username,
-                discriminator: inviteCreator.discriminator,
-                avatar: inviteCreator.avatar,
-                permissionLevel: relevantUser?.permissionLevel ?? UserPermissionLevels.Default,
-            };
-        }
-    }
-
     EntriesDatabases[EntryStates.Pending].set(newEntry);
 
     Loggers.entries.changes.log(
-        `[Pending] ${token.user.username}#${token.user.discriminator} made an application for ${guild.name} (code = ${inviteCode})`,
+        `[Pending] ${token.user.username}#${token.user.discriminator} made an application for ${inviteValidation.guildData.name} (code = ${inviteCode})`,
     );
 
     return res.sendStatus(200);

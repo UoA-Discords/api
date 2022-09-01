@@ -11,7 +11,7 @@
             "name": "MIT",
             "url": "https://github.com/UoA-Discords/api/blob/main/LICENSE"
         },
-        "version": "1.0.0"
+        "version": "1.1.0"
     },
     "servers": [
         {
@@ -51,12 +51,22 @@
                                         },
                                         "entryStats": {
                                             "type": "object",
-                                            "required": ["pending", "approved", "denied", "withdrawn", "optOut"],
+                                            "required": [
+                                                "pending",
+                                                "approved",
+                                                "featured",
+                                                "denied",
+                                                "withdrawn",
+                                                "optOut"
+                                            ],
                                             "properties": {
                                                 "pending": {
                                                     "type": "integer"
                                                 },
                                                 "approved": {
+                                                    "type": "integer"
+                                                },
+                                                "featured": {
                                                     "type": "integer"
                                                 },
                                                 "denied": {
@@ -235,16 +245,16 @@
         "/entries": {
             "get": {
                 "tags": ["Core"],
-                "description": "Gets all approved entries.<br /><br />*Permission Level: 0 (None)*",
+                "description": "Gets all approved and featured entries.<br /><br />*Permission Level: 0 (None)*",
                 "responses": {
                     "200": {
-                        "description": "All approved entries.",
+                        "description": "All approved and featured entries.",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "type": "array",
                                     "items": {
-                                        "$ref": "#/components/schemas/ApprovedEntry"
+                                        "$ref": "#/components/schemas/FullEntry"
                                     }
                                 }
                             }
@@ -394,78 +404,6 @@
                     "400": { "$ref": "#/components/responses/400" },
                     "401": { "$ref": "#/components/responses/401" },
                     "404": { "description": "An entry with that state and ID does not exist." },
-                    "429": { "$ref": "#/components/responses/429" }
-                }
-            }
-        },
-        "/entries/{state}/{id}/featured": {
-            "post": {
-                "tags": ["Entry Modification"],
-                "description": "Makes an entry featured.<br /><br />*Permission Level: 6 (Owner)*",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": ["isFeatured"],
-                                "properties": {
-                                    "isFeatured": {
-                                        "type": "boolean"
-                                    }
-                                }
-                            }
-                        }
-                    }
-                },
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "name": "state",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Set featured successfully."
-                    },
-                    "400": { "$ref": "#/components/responses/400" },
-                    "401": { "$ref": "#/components/responses/401" },
-                    "404": { "description": "An entry with that state and ID does not exist." },
-                    "429": { "$ref": "#/components/responses/429" }
-                }
-            }
-        },
-        "/entries/featured": {
-            "get": {
-                "tags": ["Core"],
-                "description": "Gets all featureds entries.<br /><br />*Permission Level: 4 (Moderator)*",
-                "responses": {
-                    "200": {
-                        "description": "Array of featured entries.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "array",
-                                    "items": {
-                                        "$ref": "#/components/schemas/BaseEntry"
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    "400": { "$ref": "#/components/responses/400" },
-                    "401": { "$ref": "#/components/responses/401" },
                     "429": { "$ref": "#/components/responses/429" }
                 }
             }
@@ -737,7 +675,7 @@
                                 "schema": {
                                     "type": "array",
                                     "items": {
-                                        "$ref": "#/components/schemas/BaseEntry"
+                                        "$ref": "#/components/schemas/PendingEntry"
                                     }
                                 }
                             }
@@ -877,31 +815,112 @@
     },
     "components": {
         "schemas": {
-            "LoginResponse": {
+            "EntryStates": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 4,
+                "description": "Possible state of the entry; Pending(0), Approved(1), Featured(2), Denied(3), or Withdrawn(4)."
+            },
+            "UserPermissionLevels": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 6,
+                "description": "Possible user permission levels; None(0), Like(1), Default(2), Elevated(3), Moderator(4), Administrator(5), or Owner(6)."
+            },
+            "SiteUser": {
                 "type": "object",
-                "description": "Object returned from a successful login or refresh request.",
-                "required": ["discordAuth", "siteAuth"],
+                "description": "Some of the user data stored on the server, the first 5 properties are from the [Discord API user object](https://discord.com/developers/docs/resources/user#user-object).",
+                "required": [
+                    "id",
+                    "username",
+                    "discriminator",
+                    "avatar",
+                    "firstLogin",
+                    "lastLogin",
+                    "permissionLevel",
+                    "myApplicationStats",
+                    "myAdminStats"
+                ],
                 "additionalProperties": false,
                 "properties": {
-                    "discordAuth": {
-                        "$ref": "#/components/schemas/AccessTokenResponse"
-                    },
-                    "siteAuth": {
+                    "id": {
                         "type": "string",
-                        "description": "JsonWebToken to use for any elevated requests to this API."
+                        "description": "Discord ID of this user."
                     },
-                    "userData": {
-                        "allOf": [{ "$ref": "#/components/schemas/SiteUser" }],
-                        "required": ["ip", "likes"],
+                    "username": {
+                        "type": "string"
+                    },
+                    "discriminator": {
+                        "type": "string"
+                    },
+                    "avatar": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "public_flags": {
+                        "type": "integer"
+                    },
+                    "firstLogin": {
+                        "type": "string",
+                        "example": "2022-08-11T05:22:42.140Z"
+                    },
+                    "lastLogin": {
+                        "type": "string",
+                        "example": "2022-08-11T05:22:42.140Z",
+                        "description": "Last login or refresh."
+                    },
+                    "permissionLevel": {
+                        "$ref": "#/components/schemas/UserPermissionLevels"
+                    },
+                    "myApplicationStats": {
+                        "type": "object",
+                        "required": ["0", "1", "2", "3", "4"],
+                        "description": "Number of applications this user currently has, indexed by entry state.",
                         "properties": {
-                            "ip": {
-                                "type": "string"
+                            "0": {
+                                "type": "number"
                             },
-                            "likes": {
-                                "type": "array",
-                                "items": { "type": "string" }
+                            "1": {
+                                "type": "number"
+                            },
+                            "2": {
+                                "type": "number"
+                            },
+                            "3": {
+                                "type": "number"
+                            },
+                            "4": {
+                                "type": "number"
                             }
                         }
+                    },
+                    "myAdminStats": {
+                        "type": "object",
+                        "required": ["1", "2", "3", "4"],
+                        "description": "Number of entry state modifications this user has made, indexed by entry state changed to.",
+                        "properties": {
+                            "1": {
+                                "type": "number"
+                            },
+                            "2": {
+                                "type": "number"
+                            },
+                            "3": {
+                                "type": "number"
+                            },
+                            "4": {
+                                "type": "number"
+                            }
+                        }
+                    },
+                    "ip": {
+                        "type": "string",
+                        "description": "IP address of this user, only available to owner."
+                    },
+                    "likes": {
+                        "type": "array",
+                        "items": { "type": "string" },
+                        "description": "List of guild IDs that this user has liked, only available to admins or above."
                     }
                 }
             },
@@ -928,112 +947,26 @@
                     },
                     "scope": {
                         "type": "string",
-                        "default": "identify guilds"
+                        "default": "identify"
                     }
                 }
             },
-            "SiteUser": {
+            "LoginResponse": {
                 "type": "object",
-                "description": "Some of the user data stored on the server, the first 5 properties are from the [Discord API user object](https://discord.com/developers/docs/resources/user#user-object).",
-                "required": [
-                    "id",
-                    "username",
-                    "discriminator",
-                    "avatar",
-                    "firstLogin",
-                    "lastLogin",
-                    "permissionLevel",
-                    "myApplicationStats",
-                    "myAdminStats"
-                ],
+                "description": "Object returned from a successful login or refresh request.",
+                "required": ["discordAuth", "siteAuth", "userData"],
                 "additionalProperties": false,
                 "properties": {
-                    "id": {
+                    "discordAuth": {
+                        "$ref": "#/components/schemas/AccessTokenResponse"
+                    },
+                    "siteAuth": {
                         "type": "string",
-                        "description": "User's Discord ID."
+                        "description": "JsonWebToken to use for any elevated requests to this API."
                     },
-                    "username": {
-                        "type": "string"
-                    },
-                    "discriminator": {
-                        "type": "string"
-                    },
-                    "avatar": {
-                        "type": "string",
-                        "nullable": true
-                    },
-                    "public_flags": {
-                        "type": "integer"
-                    },
-                    "firstLogin": {
-                        "type": "string",
-                        "example": "2022-08-11T05:22:42.140Z"
-                    },
-                    "lastLogin": {
-                        "type": "string",
-                        "example": "2022-08-11T05:22:42.140Z",
-                        "description": "ISO timestamp of last login or refresh of this user."
-                    },
-                    "permissionLevel": {
-                        "type": "number"
-                    },
-                    "myApplicationStats": {
-                        "type": "object",
-                        "required": ["0", "1", "2", "3"],
-                        "description": "Number of applications this user currently has, indexed by entry state.",
-                        "properties": {
-                            "0": {
-                                "type": "number"
-                            },
-                            "1": {
-                                "type": "number"
-                            },
-                            "2": {
-                                "type": "number"
-                            },
-                            "3": {
-                                "type": "number"
-                            }
-                        }
-                    },
-                    "myAdminStats": {
-                        "type": "object",
-                        "required": ["1", "2", "3"],
-                        "description": "Number of entry state modifications this user has made, indexed by entry state changed to.",
-                        "properties": {
-                            "1": {
-                                "type": "number"
-                            },
-                            "2": {
-                                "type": "number"
-                            },
-                            "3": {
-                                "type": "number"
-                            }
-                        }
-                    },
-                    "ip": {
-                        "type": "string",
-                        "description": "IP address of this user, only available to owner."
-                    },
-                    "likes": {
-                        "type": "array",
-                        "items": { "type": "string" },
-                        "description": "List of guild IDs that this user has liked, only available to admins or above."
-                    }
-                }
-            },
-            "FeaturedData": {
-                "type": "object",
-                "required": ["featuredBy", "featuredSince"],
-                "additionalProperties": false,
-                "properties": {
-                    "featuredBy": {
-                        "$ref": "#/components/schemas/BasicUserInfo"
-                    },
-                    "featuredAt": {
-                        "type": "string",
-                        "example": "2022-08-11T05:22:42.140Z"
+                    "userData": {
+                        "allOf": [{ "$ref": "#/components/schemas/SiteUser" }],
+                        "required": ["ip", "likes"]
                     }
                 }
             },
@@ -1053,10 +986,41 @@
                         "type": "string"
                     },
                     "avatar": {
-                        "type": "string"
+                        "type": "string",
+                        "nullable": true
                     },
                     "permissionLevel": {
-                        "type": "integer"
+                        "$ref": "#/components/schemas/UserPermissionLevels"
+                    }
+                }
+            },
+            "GuildData": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["name", "icon", "splash", "banner", "description", "verificationLevel"],
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "icon": {
+                        "type": "string"
+                    },
+                    "splash": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "banner": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "description": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "verificationLevel": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 4
                     }
                 }
             },
@@ -1066,6 +1030,7 @@
                     "id",
                     "state",
                     "inviteCode",
+                    "inviteCreatedBy",
                     "guildData",
                     "memberCountHistory",
                     "createdBy",
@@ -1075,35 +1040,39 @@
                 ],
                 "properties": {
                     "id": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "The Discord ID of the guild associated with this entry."
                     },
                     "state": {
-                        "type": "integer",
-                        "description": "Pending(0), Approved(1), Denied(2), or Withdrawn(3)"
+                        "$ref": "#/components/schemas/EntryStates"
                     },
                     "inviteCode": {
                         "type": "string",
-                        "example": "ABC123"
+                        "description": "Invite code, without the 'discord.gg/' prefix."
                     },
                     "inviteCreatedBy": {
-                        "$ref": "#/components/schemas/BasicUserInfo"
+                        "allOf": [{ "$ref": "#/components/schemas/BasicUserInfo" }],
+                        "nullable": true,
+                        "description": "Who created this invite, can be null since some invites are not created by users."
                     },
                     "guildData": {
-                        "type": "object",
-                        "description": "See the official [Discord API docs](https://discord.com/developers/docs/resources/guild#guild-object) for more info."
+                        "$ref": "#/components/schemas/GuildData"
                     },
                     "memberCountHistory": {
                         "type": "array",
+                        "description": "Array of member and online count, up to the last 30 days. With the first tuple in the array being the oldest.",
                         "items": {
                             "type": "array",
-                            "nullable": true,
-                            "minItems": 2,
-                            "maxItems": 2,
+                            "minLength": 2,
+                            "maxLength": 2,
                             "items": {
-                                "type": "integer",
-                                "description": "Tuple of [online, total] members in the server."
+                                "type": "number",
+                                "minimum": 0,
+                                "description": "Tuple of [online, total] members for that day."
                             }
-                        }
+                        },
+                        "minLength": 0,
+                        "maxLength": 30
                     },
                     "createdBy": {
                         "$ref": "#/components/schemas/BasicUserInfo"
@@ -1113,59 +1082,53 @@
                         "example": "2022-08-11T05:22:42.140Z"
                     },
                     "likes": {
-                        "type": "integer"
+                        "type": "integer",
+                        "minimum": 0
                     },
                     "facultyTags": {
                         "type": "array",
                         "items": {
-                            "type": "number"
+                            "type": "number",
+                            "minimum": 0
                         }
-                    },
-                    "featuredData": {
-                        "$ref": "#/components/schemas/FeaturedData"
                     }
                 }
             },
-            "ApprovedEntry": {
+            "PendingEntry": {
+                "type": "object",
                 "allOf": [{ "$ref": "#/components/schemas/BaseEntry" }],
-                "required": ["approvedBy", "approvedAt"],
+                "required": ["state"],
                 "properties": {
-                    "approvedBy": {
-                        "$ref": "#/components/schemas/BasicUserInfo"
-                    },
-                    "approvedAt": {
-                        "type": "string",
-                        "example": "2022-08-11T05:22:42.140Z"
+                    "state": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 0,
+                        "default": 0
                     }
                 }
             },
-            "DeniedEntry": {
+            "FullEntry": {
+                "type": "object",
                 "allOf": [{ "$ref": "#/components/schemas/BaseEntry" }],
-                "required": ["deniedBy", "deniedAt", "reason"],
+                "required": ["state", "stateActionDoneBy", "stateActionDoneAt", "stateActionReason"],
                 "properties": {
-                    "deniedBy": {
-                        "$ref": "#/components/schemas/BasicUserInfo"
+                    "state": {
+                        "type": "integer",
+                        "minimum": 1
                     },
-                    "deniedAt": {
+                    "stateActionDoneBy": {
+                        "allOf": [{ "$ref": "#/components/schemas/BasicUserInfo" }],
+                        "nullable": true,
+                        "description": "User who transitioned this entry into its latest state, may be null if the entry was automatically withdrawn."
+                    },
+                    "stateActionDoneAt": {
                         "type": "string",
                         "example": "2022-08-11T05:22:42.140Z"
                     },
-                    "reason": {
+                    "stateActionReason": {
                         "type": "string",
-                        "example": "not UoA specific"
-                    }
-                }
-            },
-            "WithdrawnEntry": {
-                "allOf": [{ "$ref": "#/components/schemas/BaseEntry" }],
-                "required": ["withdrawnBy", "withdrawnAt"],
-                "properties": {
-                    "withdrawnBy": {
-                        "$ref": "#/components/schemas/BasicUserInfo"
-                    },
-                    "withdrawnAtId": {
-                        "type": "string",
-                        "example": "2022-08-11T05:22:42.140Z"
+                        "nullable": true,
+                        "description": "Reason for change in state, null for every state besides withdrawn and denied."
                     }
                 }
             },

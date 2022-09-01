@@ -74,6 +74,9 @@ export const modifyEntryTags: RequestHandler = (req, res) => {
             case EntryStates.Approved:
                 EntriesDatabases[EntryStates.Approved].set(entry);
                 break;
+            case EntryStates.Featured:
+                EntriesDatabases[EntryStates.Featured].set(entry);
+                break;
             case EntryStates.Denied:
                 EntriesDatabases[EntryStates.Denied].set(entry);
                 break;

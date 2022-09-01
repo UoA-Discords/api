@@ -53,15 +53,13 @@ export abstract class AuthDiscordAPI {
      * Makes a POST request to the Discord token revocation URL, used to invalidate
      * an access token.
      * @param {String} token The current access token.
-     * @returns {boolean} Whether revocation was successful.
      * @throws Throws an error if the provided access token is invalid.
      */
-    public static async revokeToken(token: string): Promise<boolean> {
+    public static async revokeToken(token: string): Promise<void> {
         const body = this.makeRequestBody();
         body.set(`token`, token);
 
-        const { data } = await axios.post<boolean>(OAuth2Routes.tokenRevocationURL, body);
-        return data;
+        await axios.post<void>(OAuth2Routes.tokenRevocationURL, body);
     }
 
     /**
@@ -88,5 +86,7 @@ export abstract class AuthDiscordAPI {
         if (discordUser.public_flags !== undefined) {
             siteUser.public_flags = discordUser.public_flags;
         } else delete siteUser.public_flags;
+
+        siteUser.lastLogin = new Date().toISOString();
     }
 }

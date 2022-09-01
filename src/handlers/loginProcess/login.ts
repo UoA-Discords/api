@@ -71,11 +71,13 @@ export const discordLogin: RequestHandler = async (req, res) => {
                 myApplicationStats: {
                     [EntryStates.Pending]: 0,
                     [EntryStates.Approved]: 0,
+                    [EntryStates.Featured]: 0,
                     [EntryStates.Denied]: 0,
                     [EntryStates.Withdrawn]: 0,
                 },
                 myAdminStats: {
                     [EntryStates.Approved]: 0,
+                    [EntryStates.Featured]: 0,
                     [EntryStates.Denied]: 0,
                     [EntryStates.Withdrawn]: 0,
                 },

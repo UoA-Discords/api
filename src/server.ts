@@ -15,22 +15,8 @@ import { customRateLimiter } from './middleware/customRateLimiter';
 import { EntryStates } from './shared/Types/Entries';
 import { discordLogin, discordLogout, discordRefresh } from './handlers/loginProcess';
 import { getAllStaff, getAllUsers, getUserById, patchUserPerms } from './handlers/userManagement';
-import {
-    deleteOptOut,
-    likeEntry,
-    makeOptOut,
-    modifyEntryState,
-    modifyEntryTags,
-    setEntryFeatured,
-} from './handlers/entryModification';
-import {
-    apply,
-    getFeaturedEntries,
-    getEntriesOfState,
-    getAllEntries,
-    getOptOutEntries,
-    getSelfPendingEntries,
-} from './handlers/core';
+import { deleteOptOut, likeEntry, makeOptOut, modifyEntryState, modifyEntryTags } from './handlers/entryModification';
+import { apply, getEntriesOfState, getAllEntries, getOptOutEntries, getSelfPendingEntries } from './handlers/core';
 import { join } from 'path';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -77,6 +63,7 @@ app.set(`trust proxy`, Config.numProxies);
             entryStats: {
                 pending: EntriesDatabases[EntryStates.Pending].size,
                 approved: EntriesDatabases[EntryStates.Approved].size,
+                featured: EntriesDatabases[EntryStates.Featured].size,
                 denied: EntriesDatabases[EntryStates.Denied].size,
                 withdrawn: EntriesDatabases[EntryStates.Withdrawn].size,
                 optOut: OptOutDatabase.size,
@@ -103,7 +90,7 @@ app.set(`trust proxy`, Config.numProxies);
     app.patch(`/entries/:id/likes`, likeEntry);
     app.delete(`/entries/optout`, deleteOptOut);
     app.post(`/entries/optout`, makeOptOut);
-    app.post(`/entries/:state/:id/featured`, setEntryFeatured);
+    // app.post(`/entries/:state/:id/featured`, setEntryFeatured);
     app.patch(`/entries/:state/:id/tags`, modifyEntryTags);
     app.patch(`/entries/:state/:id/state`, modifyEntryState);
 
@@ -111,7 +98,7 @@ app.set(`trust proxy`, Config.numProxies);
     app.post(`/apply`, apply);
     app.get(`/entries/pending/me`, getSelfPendingEntries);
     app.get(`/entries/optout`, getOptOutEntries);
-    app.get(`/entries/featured`, getFeaturedEntries);
+    // app.get(`/entries/featured`, getFeaturedEntries);
     app.get(`/entries/:state`, getEntriesOfState);
     app.get(`/entries`, getAllEntries);
 }
