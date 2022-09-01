@@ -2,29 +2,16 @@ import { RequestHandler } from 'express';
 import { EntriesDatabases, UserDatabase } from '../../classes/Databases';
 import { Loggers } from '../../classes/Loggers';
 import { validateSiteToken } from '../../functions/siteTokenFunctions';
-import { ApprovedEntry, BaseEntry, DeniedEntry, Entry, EntryStates, WithdrawnEntry } from '../../shared/Types/Entries';
+import { EntryStates, FullEntry } from '../../shared/Types/Entries';
 import { BasicUserInfo, UserPermissionLevels } from '../../shared/Types/User';
 
-function duplicateEntry(entry: Entry): BaseEntry {
-    const newEntry: BaseEntry = {
-        id: entry.id,
-        state: entry.state,
-        inviteCode: entry.inviteCode,
-        guildData: entry.guildData,
-        memberCountHistory: entry.memberCountHistory,
-        createdBy: entry.createdBy,
-        createdAt: entry.createdAt,
-        likes: entry.likes,
-        facultyTags: entry.facultyTags,
-    };
-
-    if (entry.inviteCreatedBy !== undefined) {
-        newEntry.inviteCreatedBy = entry.inviteCreatedBy;
-    }
-
-    return newEntry;
-}
-
+/**
+ * Handler for changing the state of an entry.
+ *
+ * - Cannot change the state of any entry to **pending**.
+ * - Requires Moderator or above for any state (excluding to/from **featured**).
+ * - Requires Owner for any state change to/from **featured**.
+ */
 export const modifyEntryState: RequestHandler = (req, res) => {
     const token = validateSiteToken(req.get(`Authorization`));
 
@@ -38,6 +25,7 @@ export const modifyEntryState: RequestHandler = (req, res) => {
         return res.sendStatus(401);
     }
 
+    /** The state we are trying to change the entry to. */
     const newState = req.body[`newState`] as EntryStates;
     if (
         typeof newState !== `number` ||
@@ -52,6 +40,7 @@ export const modifyEntryState: RequestHandler = (req, res) => {
         });
     }
 
+    /** The reason specified for withdrawal or denial, if applicable. */
     const reason = req.body[`reason`];
     if ((newState === EntryStates.Denied || newState === EntryStates.Withdrawn) && typeof reason !== `string`) {
         return res.status(400).json({
@@ -61,7 +50,12 @@ export const modifyEntryState: RequestHandler = (req, res) => {
         });
     }
 
-    const { state, id } = req.params;
+    /** State of the current entry, obtained from request parameters so in string form. */
+    const state = req.params[`state`];
+
+    /** ID of the entry we wish to change. */
+    const id = req.params[`id`];
+
     if (state === undefined || id === undefined) {
         return res.status(400).json({
             shortMessage: `Unknown State or ID`,
@@ -70,6 +64,7 @@ export const modifyEntryState: RequestHandler = (req, res) => {
         });
     }
 
+    /** State of the entry we wish to change. */
     const currentState = Number(state) as EntryStates;
 
     if (EntryStates[currentState] === undefined) {
@@ -78,6 +73,15 @@ export const modifyEntryState: RequestHandler = (req, res) => {
             longMessage: `An invalid state was specified in the request URL. Please specify a value between 0 and ${EntryStates.Withdrawn} (inclusive).`,
             fixMessage: null,
         });
+    }
+
+    // validate permissions for featured entries
+    if (currentState === EntryStates.Featured || newState === EntryStates.Featured) {
+        if (token.user.permissionLevel < UserPermissionLevels.Owner) {
+            res.setHeader(`Perms-RequiredLevel`, UserPermissionLevels.Owner);
+            res.setHeader(`Perms-CurrentLevel`, token.user.permissionLevel);
+            return res.sendStatus(401);
+        }
     }
 
     const entry = EntriesDatabases[currentState].get(id);
@@ -98,8 +102,8 @@ export const modifyEntryState: RequestHandler = (req, res) => {
         });
     }
 
-    const user = UserDatabase.get(entry.createdBy.id);
-    if (user === null) {
+    const creator = UserDatabase.get(entry.createdBy.id);
+    if (creator === null) {
         return res.status(400).json({
             shortMessage: `Invalid User`,
             longMessage: `The user who made this application doesn't exist.`,
@@ -107,9 +111,7 @@ export const modifyEntryState: RequestHandler = (req, res) => {
         });
     }
 
-    user.myApplicationStats[currentState]--;
-
-    EntriesDatabases[currentState].remove(entry.id);
+    EntriesDatabases[currentState].remove(id);
 
     const actionUserInfo: BasicUserInfo = {
         id: token.user.id,
@@ -119,46 +121,59 @@ export const modifyEntryState: RequestHandler = (req, res) => {
         permissionLevel: token.user.permissionLevel,
     };
 
-    user.myApplicationStats[newState]++;
+    const baseNewEntry = {
+        ...entry,
+        stateActionDoneBy: actionUserInfo,
+        stateActionDoneAt: new Date().toISOString(),
+        stateActionReason: null,
+    };
 
     switch (newState) {
         case EntryStates.Approved: {
-            const newEntry: ApprovedEntry = {
-                ...duplicateEntry(entry),
-                approvedBy: actionUserInfo,
-                approvedAt: new Date().toISOString(),
+            const newEntry: FullEntry<EntryStates.Approved> = {
+                ...baseNewEntry,
                 state: EntryStates.Approved,
             };
             EntriesDatabases[EntryStates.Approved].set(newEntry);
             break;
         }
+        case EntryStates.Featured: {
+            const newEntry: FullEntry<EntryStates.Featured> = {
+                ...baseNewEntry,
+                state: EntryStates.Featured,
+            };
+            EntriesDatabases[EntryStates.Featured].set(newEntry);
+            break;
+        }
         case EntryStates.Denied: {
-            const newEntry: DeniedEntry = {
-                ...duplicateEntry(entry),
-                deniedBy: actionUserInfo,
-                deniedAt: new Date().toISOString(),
+            const newEntry: FullEntry<EntryStates.Denied> = {
+                ...baseNewEntry,
                 state: EntryStates.Denied,
-                reason: reason as string,
+                stateActionReason: reason as string,
             };
             EntriesDatabases[EntryStates.Denied].set(newEntry);
             break;
         }
         case EntryStates.Withdrawn: {
-            const newEntry: WithdrawnEntry = {
-                ...duplicateEntry(entry),
-                withdrawnBy: actionUserInfo,
-                withdrawnAt: new Date().toISOString(),
+            const newEntry: FullEntry<EntryStates.Withdrawn> = {
+                ...baseNewEntry,
                 state: EntryStates.Withdrawn,
-                reason: reason as string,
+                stateActionReason: reason as string,
             };
             EntriesDatabases[EntryStates.Withdrawn].set(newEntry);
             break;
         }
+        default:
+            Loggers.error.log(`Unhandled entry state change, ${EntryStates[newState]} (${newState})`);
+            return res.sendStatus(500);
     }
 
-    UserDatabase.set(user);
+    // update the stats of the user who created this entry
+    creator.myApplicationStats[currentState]--;
+    creator.myApplicationStats[newState]++;
+    UserDatabase.set(creator);
 
-    // update the staff members stats
+    // update the stats of the staff member who modified this entry's state
     token.user.myAdminStats[newState]++;
     UserDatabase.set(token.user);
 
