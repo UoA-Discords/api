@@ -252,9 +252,22 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "array",
-                                    "items": {
-                                        "$ref": "#/components/schemas/FullEntry"
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "required": ["approved", "featured"],
+                                    "properties": {
+                                        "approved": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/FullEntry"
+                                            }
+                                        },
+                                        "featured": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/FullEntry"
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -1051,8 +1064,7 @@
                         "description": "Invite code, without the 'discord.gg/' prefix."
                     },
                     "inviteCreatedBy": {
-                        "allOf": [{ "$ref": "#/components/schemas/BasicUserInfo" }],
-                        "nullable": true,
+                        "anyOf": [{ "$ref": "#/components/schemas/BasicUserInfo" }, { "nullable": true }],
                         "description": "Who created this invite, can be null since some invites are not created by users."
                     },
                     "guildData": {
@@ -1117,8 +1129,7 @@
                         "minimum": 1
                     },
                     "stateActionDoneBy": {
-                        "allOf": [{ "$ref": "#/components/schemas/BasicUserInfo" }],
-                        "nullable": true,
+                        "anyOf": [{ "$ref": "#/components/schemas/BasicUserInfo" }, { "nullable": true }],
                         "description": "User who transitioned this entry into its latest state, may be null if the entry was automatically withdrawn."
                     },
                     "stateActionDoneAt": {
