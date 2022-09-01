@@ -13,6 +13,7 @@ function validateAdminStats() {
         if (expectedAdminStats[userId] === undefined) {
             expectedAdminStats[userId] = {
                 [EntryStates.Approved]: 0,
+                [EntryStates.Featured]: 0,
                 [EntryStates.Denied]: 0,
                 [EntryStates.Withdrawn]: 0,
             };
@@ -20,16 +21,13 @@ function validateAdminStats() {
         expectedAdminStats[userId]![k]! += 1;
     };
 
-    for (const guild of EntriesDatabases[EntryStates.Approved].getAll()) {
-        addIfNonExistent(guild.approvedBy.id, EntryStates.Approved);
-    }
-
-    for (const guild of EntriesDatabases[EntryStates.Denied].getAll()) {
-        addIfNonExistent(guild.deniedBy.id, EntryStates.Denied);
-    }
-
-    for (const guild of EntriesDatabases[EntryStates.Withdrawn].getAll()) {
-        addIfNonExistent(guild.withdrawnBy?.id ?? `AUTOMATED`, EntryStates.Withdrawn);
+    for (const rState in EntriesDatabases) {
+        const state = Number(rState) as EntryStates;
+        if (state !== EntryStates.Pending) {
+            for (const guild of EntriesDatabases[state]!.getAll()) {
+                addIfNonExistent(guild.stateActionDoneBy?.id ?? `AUTOMATED`, state);
+            }
+        }
     }
 
     /** Checks if 2 admin stats objects are the same. */
