@@ -188,6 +188,8 @@ const entriesOnly = process.argv.includes(`--only=entries`);
 const usersOnly = process.argv.includes(`--only=users`);
 if (process.argv.includes(`--confirm`)) {
     populateDatabases(entriesOnly, usersOnly);
+    console.log(`${Colours.FgGreen}Done!${Colours.Reset}`);
+    process.exit();
 } else {
     const affectedData = entriesOnly ? `existing entries` : usersOnly ? `existing users` : `existing entries and users`;
 
@@ -204,9 +206,10 @@ if (process.argv.includes(`--confirm`)) {
 
         if (input === `y`) {
             populateDatabases(entriesOnly, usersOnly);
+            console.log(`${Colours.FgGreen}Done!${Colours.Reset}`);
         } else {
             console.log(`Aborted`);
-            process.exit();
         }
+        process.exit();
     });
 }
