@@ -51,3 +51,4 @@ You can now run the API using `node .` or `yarn start` in a terminal.
 -   `yarn test` Runs Jest testing on the application.
 -   `yarn check-all` Runs linting, typechecking, and testing.
 -   `yarn integrity:*` Runs custom scripts for checking validity of data in the **data/** directory.
+-   `yarn populate` Runs custom scripts for populating the database with fake (but valid) values.
