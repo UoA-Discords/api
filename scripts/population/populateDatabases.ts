@@ -1,5 +1,5 @@
 import { Colours } from '../../src/types/Colours';
-import { UserDatabase, EntriesDatabases } from '../../src/classes/Databases';
+import { UserDatabase, EntriesDatabases, OptOutDatabase } from '../../src/classes/Databases';
 import { BasicUserInfo, SiteUser, UserPermissionLevels } from '../../src/shared/Types/User';
 import { makeRandomUser } from './helpers/userGen';
 import { EntryStates, FullEntry } from '../../src/shared/Types/Entries';
@@ -32,6 +32,7 @@ function populateEntries(
     for (const database of Object.values(EntriesDatabases)) {
         database.remove(...database.getAllKeys());
     }
+    OptOutDatabase.remove(...OptOutDatabase.getAllKeys());
 
     const output: Record<string, FullEntry<Exclude<EntryStates, EntryStates.Pending>>> = {};
 
