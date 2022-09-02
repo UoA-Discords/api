@@ -34,7 +34,7 @@ const nouns = [
     `dirt`,
     `candidate`,
     `solution`,
-    `inflation`,
+    `committee`,
     `awareness`,
     `understanding`,
     `growth`,
