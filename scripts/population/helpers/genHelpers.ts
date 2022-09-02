@@ -21,6 +21,9 @@ const adjectives = [
     `wry`,
     `repulsive`,
     `unbiased`,
+    `sussy`,
+    `awesome`,
+    `studious`,
 ];
 
 const adjLen = adjectives.length;
@@ -51,6 +54,9 @@ const nouns = [
     `editor`,
     `confusion`,
     `grandmother`,
+    `gamer`,
+    `student`,
+    `scholar`,
 ];
 
 export function randomNoun(): string {
