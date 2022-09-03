@@ -74,6 +74,10 @@ export function randomId(length: number = 18): string {
     return output.join(``);
 }
 
+export function capitalize(str: string): string {
+    return str.slice(0, 1).toUpperCase() + str.slice(1);
+}
+
 const oldestPossibleDate = new Date(`2021-1-1`).getTime();
 
 /** Randomly generates past date. Can be as old as 1/1/2021 and as recent as Date.now().  */

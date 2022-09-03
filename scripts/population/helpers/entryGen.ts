@@ -1,7 +1,7 @@
 import { GuildVerificationLevel } from 'discord-api-types/v10';
 import { EntryFacultyTags, EntryStates, FullEntry, PendingEntry } from '../../../src/shared/Types/Entries';
 import { BasicUserInfo, SiteUser } from '../../../src/shared/Types/User';
-import { randomAdjective, randomDate, randomId, randomNoun } from './genHelpers';
+import { capitalize, randomAdjective, randomDate, randomId, randomNoun } from './genHelpers';
 
 /** Randomly generates a syntactically valid invide code (a-z, A-Z, 0-9). */
 function randomInviteCode(): string {
@@ -68,9 +68,7 @@ function randomGuildName(): string {
     const randomNounA = randomNoun();
     const randomNounB = randomNoun();
 
-    return `${randomNounA.slice(0, 1).toUpperCase()}${randomNounA.slice(1)}${randomNounB
-        .slice(0, 1)
-        .toUpperCase()}${randomNounB.slice(1)}`;
+    return `${capitalize(randomNounA)}${randomNounB.slice(1)}`;
 }
 
 function randomFacultyTags(): EntryFacultyTags[] {
