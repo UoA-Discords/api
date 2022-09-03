@@ -31,8 +31,6 @@ export function randomAdjective(): string {
     return adjectives[Math.floor(Math.random() * adjLen)];
 }
 
-const nounLen = adjectives.length;
-
 const nouns = [
     `dirt`,
     `candidate`,
@@ -58,6 +56,8 @@ const nouns = [
     `student`,
     `scholar`,
 ];
+
+const nounLen = nouns.length;
 
 export function randomNoun(): string {
     return nouns[Math.floor(Math.random() * nounLen)];
