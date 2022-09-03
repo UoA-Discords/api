@@ -7,23 +7,23 @@ import { randomDate, randomIp } from './helpers/genHelpers';
 import { makeRandomFullEntry, makeRandomPendingEntry } from './helpers/entryGen';
 import { generateLikes } from './helpers/likeGen';
 
-const userParams: Map<UserPermissionLevels, number> = new Map([
-    [UserPermissionLevels.None, 3],
-    [UserPermissionLevels.Like, 3],
-    [UserPermissionLevels.Default, 30],
-    [UserPermissionLevels.Elevated, 10],
-    [UserPermissionLevels.Moderator, 5],
-    [UserPermissionLevels.Administrator, 3],
-    [UserPermissionLevels.Owner, 1],
-]);
+const userParams: Record<UserPermissionLevels, number> = {
+    [UserPermissionLevels.None]: 3,
+    [UserPermissionLevels.Like]: 3,
+    [UserPermissionLevels.Default]: 30,
+    [UserPermissionLevels.Elevated]: 10,
+    [UserPermissionLevels.Moderator]: 5,
+    [UserPermissionLevels.Administrator]: 3,
+    [UserPermissionLevels.Owner]: 1,
+};
 
-const entryParams: Map<EntryStates, number> = new Map([
-    [EntryStates.Pending, 10],
-    [EntryStates.Approved, 30],
-    [EntryStates.Featured, 3],
-    [EntryStates.Denied, 5],
-    [EntryStates.Withdrawn, 5],
-]);
+const entryParams: Record<EntryStates, number> = {
+    [EntryStates.Pending]: 10,
+    [EntryStates.Approved]: 30,
+    [EntryStates.Featured]: 3,
+    [EntryStates.Denied]: 5,
+    [EntryStates.Withdrawn]: 5,
+};
 
 function populateEntries(
     userInfoMap: Record<string, SiteUser>,
@@ -37,15 +37,22 @@ function populateEntries(
     const output: Record<string, FullEntry<Exclude<EntryStates, EntryStates.Pending>>> = {};
 
     console.log(
-        `Creating random entries (${[...entryParams.keys()]
-            .map((e) => `${Colours.FgCyan}${entryParams[e]}${Colours.Reset} ${EntryStates[e]}`)
+        `Creating random entries (${Object.keys(entryParams)
+            .map(
+                (e) =>
+                    `${Colours.FgCyan}${entryParams[Number(e) as EntryStates]}${Colours.Reset} ${
+                        EntryStates[Number(e) as EntryStates]
+                    }`,
+            )
             .join(`, `)})`,
     );
 
     const userIds = Object.keys(userInfoMap);
     const randomExistingUser = () => userInfoMap[userIds[Math.floor(Math.random() * userIds.length)]];
 
-    for (const entryState of entryParams.keys()) {
+    for (const key in entryParams) {
+        const entryState = Number(key) as EntryStates;
+
         for (let i = 0; i < entryParams[entryState]; i++) {
             const creator = randomExistingUser();
 
@@ -101,16 +108,22 @@ function populateUsers(): Record<string, SiteUser> {
     const userInfoMap: Record<string, SiteUser> = {};
 
     console.log(
-        `Creating random users (${[...userParams.keys()]
-            .map((e) => `${Colours.FgCyan}${userParams[e]}${Colours.Reset} ${UserPermissionLevels[e]}`)
+        `Creating random users (${Object.keys(userParams)
+            .map(
+                (e) =>
+                    `${Colours.FgCyan}${userParams[Number(e) as UserPermissionLevels]}${Colours.Reset} ${
+                        UserPermissionLevels[Number(e) as UserPermissionLevels]
+                    }`,
+            )
             .join(`, `)})`,
     );
 
-    for (const permissionLevel of userParams.keys()) {
+    for (const key in userParams) {
+        const permissionLevel = Number(key) as UserPermissionLevels;
         for (let i = 0; i < userParams[permissionLevel]; i++) {
             const user = {
                 ...makeRandomUser(),
-                permissionLevel,
+                permissionLevel: permissionLevel,
                 myApplicationStats: {
                     [EntryStates.Pending]: 0,
                     [EntryStates.Approved]: 0,
