@@ -1,5 +1,5 @@
 import { UserDatabase, EntriesDatabases } from '../../src/classes/Databases';
-import { Entry, EntryStates } from '../../src/shared/Types/Entries';
+import { EntryStates, FullEntry, PendingEntry } from '../../src/shared/Types/Entries';
 import { Colours } from '../../src/types/Colours';
 
 /**
@@ -21,7 +21,11 @@ function validateUsersExist() {
 
     const discrepancies: string[] = [];
 
-    const makeMessage = (entry: Entry, action: string, id: string): void => {
+    const makeMessage = (
+        entry: FullEntry<Exclude<EntryStates, EntryStates.Pending>> | PendingEntry,
+        action: string,
+        id: string,
+    ): void => {
         discrepancies.push(
             `- ${Colours.FgMagenta}${entry.guildData.name}${Colours.Reset} (${Colours.FgCyan}${entry.id}${Colours.Reset}) was ${action} an unknown user with ID ${Colours.FgRed}${id}${Colours.Reset}`,
         );
@@ -33,7 +37,7 @@ function validateUsersExist() {
                 makeMessage(entry, `created by`, entry.createdBy.id);
             }
 
-            if (entry.inviteCreatedBy === undefined) {
+            if (entry.inviteCreatedBy === null) {
                 inviteStats.missing++;
             } else if (allUserIds.has(entry.inviteCreatedBy.id)) {
                 inviteStats.registered++;
@@ -43,20 +47,11 @@ function validateUsersExist() {
 
             if (entry.state === EntryStates.Pending) continue;
 
-            let idToCheck: string;
-            let action: string;
+            const idToCheck = entry.stateActionDoneBy?.id;
+            const action = `${EntryStates[entry.state].toLowerCase()} by`;
 
-            if (entry.state === EntryStates.Approved) {
-                idToCheck = entry.approvedBy.id;
-                action = `approved by`;
-            } else if (entry.state === EntryStates.Denied) {
-                idToCheck = entry.deniedBy.id;
-                action = `denied by`;
-            } else if (entry.withdrawnBy !== undefined) {
-                idToCheck = entry.withdrawnBy.id;
-                action = `withdrawn by`;
-            } else {
-                // withdrawnBy is undefined, meaning it was automated
+            if (idToCheck === undefined) {
+                // stateActionDoneBy is null, meaning it was automated
                 // we don't need to check that "automated" exists in the database
                 // (because it doesn't)
                 continue;

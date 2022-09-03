@@ -22,6 +22,7 @@
         "integrity:tags": "ts-node scripts/integrity/tags.ts",
         "integrity:users": "ts-node scripts/integrity/usersExist.ts",
         "integrity:all": "yarn integrity:adminStats && yarn integrity:applicationStats && yarn integrity:likes && yarn integrity:tags && yarn integrity:users",
+        "populate": "ts-node scripts/population/populateDatabases.ts",
         "test": "jest",
         "check-all": "yarn lint && yarn typecheck && yarn test"
     },

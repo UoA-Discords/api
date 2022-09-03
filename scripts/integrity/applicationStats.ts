@@ -9,18 +9,25 @@ function validateApplicationStats() {
     const expectedApplicationStats: Record<string, SiteUser[`myApplicationStats`]> = {};
 
     // going over each entry to record what we expect each user's stats to be
-    for (const state of [EntryStates.Pending, EntryStates.Approved, EntryStates.Denied, EntryStates.Withdrawn]) {
+    for (const state of [
+        EntryStates.Pending,
+        EntryStates.Approved,
+        EntryStates.Featured,
+        EntryStates.Denied,
+        EntryStates.Withdrawn,
+    ]) {
         for (const guild of EntriesDatabases[state].getAll()) {
             const createdBy = guild.createdBy.id;
             if (expectedApplicationStats[createdBy] === undefined) {
                 expectedApplicationStats[createdBy] = {
                     [EntryStates.Pending]: 0,
                     [EntryStates.Approved]: 0,
+                    [EntryStates.Featured]: 0,
                     [EntryStates.Denied]: 0,
                     [EntryStates.Withdrawn]: 0,
                 };
             }
-            expectedApplicationStats[createdBy]![state]!++;
+            expectedApplicationStats[createdBy][state]++;
         }
     }
 
@@ -33,7 +40,7 @@ function validateApplicationStats() {
             return Object.values(got).every((e) => e === 0);
         }
         for (const k in got) {
-            const key = k as unknown as keyof SiteUser[`myApplicationStats`];
+            const key = Number(k) as keyof SiteUser[`myApplicationStats`];
             if (got[key] !== expected[key]) return false;
         }
         return true;
@@ -43,7 +50,7 @@ function validateApplicationStats() {
     const applicationStatsToString = (d: SiteUser[`myApplicationStats`]): string => {
         return Object.keys(d)
             .map((e) => {
-                const k = e as unknown as keyof SiteUser[`myApplicationStats`];
+                const k = Number(e) as keyof SiteUser[`myApplicationStats`];
                 return `${EntryStates[k]}: ${d[k]}`;
             })
             .join(`, `);
@@ -56,7 +63,7 @@ function validateApplicationStats() {
     ): void => {
         if (expected === undefined) return;
         for (const k in got) {
-            const key = k as unknown as keyof SiteUser[`myApplicationStats`];
+            const key = Number(k) as keyof SiteUser[`myApplicationStats`];
             if (got[key] === expected[key]) {
                 delete got[key];
                 delete expected[key];

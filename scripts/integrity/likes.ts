@@ -41,9 +41,7 @@ function validateLikes() {
     if (leftoverGuilds.length > 0) {
         for (const guildId of leftoverGuilds) {
             discrepancies.push(
-                `- Guild ${Colours.FgCyan}${guildId}${Colours.Reset} is liked by ${
-                    Colours.FgRed
-                }${expectedNumberOfLikes[guildId]!}${Colours.Reset} users, but does not exist in any database.`,
+                `- Guild ${Colours.FgCyan}${guildId}${Colours.Reset} is liked by ${Colours.FgRed}${expectedNumberOfLikes[guildId]}${Colours.Reset} users, but does not exist in any database.`,
             );
         }
     }
