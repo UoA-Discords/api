@@ -48,7 +48,7 @@ function populateEntries(
     );
 
     const userIds = Object.keys(userInfoMap);
-    const randomExistingUser = () => userInfoMap[userIds[Math.floor(Math.random() * userIds.length)]!]!;
+    const randomExistingUser = () => userInfoMap[userIds[Math.floor(Math.random() * userIds.length)]];
 
     for (const key in entryParams) {
         const entryState = Number(key) as EntryStates;

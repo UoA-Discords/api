@@ -27,7 +27,7 @@ function validateApplicationStats() {
                     [EntryStates.Withdrawn]: 0,
                 };
             }
-            expectedApplicationStats[createdBy]![state]!++;
+            expectedApplicationStats[createdBy][state]++;
         }
     }
 

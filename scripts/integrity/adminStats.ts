@@ -18,13 +18,13 @@ function validateAdminStats() {
                 [EntryStates.Withdrawn]: 0,
             };
         }
-        expectedAdminStats[userId]![k]! += 1;
+        expectedAdminStats[userId][k] += 1;
     };
 
     for (const rState in EntriesDatabases) {
         const state = Number(rState) as EntryStates;
         if (state !== EntryStates.Pending) {
-            for (const guild of EntriesDatabases[state]!.getAll()) {
+            for (const guild of EntriesDatabases[state].getAll()) {
                 addIfNonExistent(guild.stateActionDoneBy?.id ?? `AUTOMATED`, state);
             }
         }

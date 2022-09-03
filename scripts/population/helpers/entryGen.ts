@@ -30,10 +30,10 @@ const maxMembersFunctions: ((i: number) => number)[] = [
     (i) => Math.abs(Math.sin(i)), // absolute sin(x)
     (i) => Math.abs(Math.cos(i)), // absolute cos(x)
     (i) =>
-        (maxMembersFunctions[0]!(i) +
-            maxMembersFunctions[1]!(i) +
-            maxMembersFunctions[2]!(i) +
-            maxMembersFunctions[3]!(i)) /
+        (maxMembersFunctions[0](i) +
+            maxMembersFunctions[1](i) +
+            maxMembersFunctions[2](i) +
+            maxMembersFunctions[3](i)) /
         4, // average of all previous
 ];
 
@@ -41,7 +41,7 @@ function randomMemberCountHistory(createdAt: string): [number, number][] {
     const daysSince = Math.floor((Date.now() - new Date(createdAt).getTime()) / (1000 * 60 * 60 * 24));
     if (daysSince === 0) return [];
 
-    const maxMembersModifier = maxMembersFunctions[Math.floor(Math.random() * maxMembersFunctions.length)]!;
+    const maxMembersModifier = maxMembersFunctions[Math.floor(Math.random() * maxMembersFunctions.length)];
     const startingMembers = 100 + Math.floor(Math.random() * 901); // start with 100 to 1000 members (inclusive)
 
     // 10% to 90% of members will be online (inclusive)

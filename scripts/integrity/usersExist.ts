@@ -48,7 +48,7 @@ function validateUsersExist() {
             if (entry.state === EntryStates.Pending) continue;
 
             const idToCheck = entry.stateActionDoneBy?.id;
-            const action = `${EntryStates[entry.state]!.toLowerCase()} by`;
+            const action = `${EntryStates[entry.state].toLowerCase()} by`;
 
             if (idToCheck === undefined) {
                 // stateActionDoneBy is null, meaning it was automated

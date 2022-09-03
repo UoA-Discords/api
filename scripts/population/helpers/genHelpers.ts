@@ -28,7 +28,7 @@ const adjectives = [
 
 const adjLen = adjectives.length;
 export function randomAdjective(): string {
-    return adjectives[Math.floor(Math.random() * adjLen)]!;
+    return adjectives[Math.floor(Math.random() * adjLen)];
 }
 
 const nounLen = adjectives.length;
@@ -60,7 +60,7 @@ const nouns = [
 ];
 
 export function randomNoun(): string {
-    return nouns[Math.floor(Math.random() * nounLen)]!;
+    return nouns[Math.floor(Math.random() * nounLen)];
 }
 
 /** Randomly generates a valid Snowflake ID. */

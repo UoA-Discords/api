@@ -32,11 +32,11 @@ export function generateLikes(
     const numLikers = Math.floor((percentLikers / 100) * numUserIds);
 
     for (let i = 0; i < numLikers; i++) {
-        const randomUserId = userIds[Math.floor(Math.random() * numUserIds)]!;
-        const randomEntryId = entryIds[Math.floor(Math.random() * numEntryIds)]!;
+        const randomUserId = userIds[Math.floor(Math.random() * numUserIds)];
+        const randomEntryId = entryIds[Math.floor(Math.random() * numEntryIds)];
 
-        const user = userPool[randomUserId]!;
-        const entry = entryPool[randomEntryId]!;
+        const user = userPool[randomUserId];
+        const entry = entryPool[randomEntryId];
 
         if (user.likes.includes(randomEntryId)) continue;
 
