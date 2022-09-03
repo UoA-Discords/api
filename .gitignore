@@ -4,3 +4,4 @@ package-lock.json
 build/
 data/
 config.json
+scripts/*migration*
