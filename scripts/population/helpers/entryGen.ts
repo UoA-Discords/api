@@ -68,11 +68,11 @@ function randomGuildName(): string {
     const randomNounA = randomNoun();
     const randomNounB = randomNoun();
 
-    return `${capitalize(randomNounA)}${randomNounB.slice(1)}`;
+    return `${capitalize(randomNounA)} ${capitalize(randomNounB)}`;
 }
 
 function randomFacultyTags(): EntryFacultyTags[] {
-    const numTags = Math.floor(Math.random() * 6); // 0 to 5 (inclusive)
+    const numTags = Math.floor(Math.random() * 4); // 0 to 3 (inclusive)
 
     return new Array<EntryFacultyTags>(numTags)
         .fill(0)
