@@ -29,7 +29,7 @@ export const likeEntry: RequestHandler = (req, res) => {
     const { like } = req.body;
     if (typeof like !== `boolean`) return res.sendStatus(400);
 
-    const entry = EntriesDatabases[EntryStates.Approved].get(id);
+    const entry = EntriesDatabases[EntryStates.Approved].get(id) ?? EntriesDatabases[EntryStates.Featured].get(id);
 
     if (entry === null) {
         return res.sendStatus(404);
@@ -49,7 +49,11 @@ export const likeEntry: RequestHandler = (req, res) => {
 
     UserDatabase.set(token.user);
 
-    EntriesDatabases[EntryStates.Approved].set(entry);
+    if (entry.state === EntryStates.Featured) {
+        EntriesDatabases[EntryStates.Featured].set(entry);
+    } else {
+        EntriesDatabases[EntryStates.Approved].set(entry);
+    }
 
     return res.sendStatus(200);
 };
