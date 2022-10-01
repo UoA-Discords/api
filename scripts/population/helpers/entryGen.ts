@@ -47,7 +47,9 @@ function randomMemberCountHistory(createdAt: string): [number, number][] {
     // 10% to 90% of members will be online (inclusive)
     const percentOnline = (10 + Math.floor(Math.random() * 91)) / 100;
 
-    return new Array<[number, number]>(Math.min(daysSince, 30)).fill([-1, -1]).map((_, i) => {
+    const randomNumDays = 1 + Math.floor(Math.random() * 30); // 1 to 30 (inclusive)
+
+    return new Array<[number, number]>(Math.min(daysSince, randomNumDays)).fill([-1, -1]).map((_, i) => {
         if (i === 0) return [Math.floor(startingMembers * percentOnline), startingMembers];
 
         // continuous random value +/- 5, but never < 1
