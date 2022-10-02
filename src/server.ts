@@ -3,6 +3,7 @@ import cors from 'cors';
 import express from 'express';
 import swaggerUi from 'swagger-ui-express';
 import * as OpenApiValidator from 'express-openapi-validator';
+import { schedule } from 'node-cron';
 
 // initialize classes
 import { UserDatabase, EntriesDatabases, OptOutDatabase } from './classes/Databases';
@@ -18,6 +19,7 @@ import { getAllStaff, getAllUsers, getUserById, patchUserPerms } from './handler
 import { deleteOptOut, likeEntry, makeOptOut, modifyEntryState, modifyEntryTags } from './handlers/entryModification';
 import { apply, getEntriesOfState, getAllEntries, getOptOutEntries, getSelfPendingEntries } from './handlers/core';
 import { join } from 'path';
+import { routineUpdates } from './functions/routineUpdates';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const apiSpec = require(`../openapi.json`);
@@ -105,3 +107,6 @@ app.set(`trust proxy`, Config.numProxies);
 
 // error handling middleware
 app.use(customErrorHandler);
+
+// scheduling updates
+schedule(`0 0 * * *`, routineUpdates, { timezone: `Pacific/Auckland` });
