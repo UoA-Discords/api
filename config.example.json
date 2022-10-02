@@ -8,6 +8,6 @@
     "numProxies": 0,
     "applyRequirements": {
         "memberCount": 100,
-        "verificationLevel": 1
+        "verificationLevel": 0
     }
 }
