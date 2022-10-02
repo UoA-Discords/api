@@ -1,5 +1,7 @@
+import { schedule } from 'node-cron';
 import { EntriesDatabases, UserDatabase } from './classes/Databases';
 import { Loggers } from './classes/Loggers';
+import { routineUpdates } from './functions/routineUpdates';
 import { Config } from './global/Config';
 import { app } from './server';
 import { EntryStates } from './shared/Types/Entries';
@@ -36,3 +38,6 @@ const listener = app.listen(Config.port, () => {
         );
     }
 });
+
+// scheduling updates
+schedule(`0 0 * * *`, routineUpdates, { timezone: `Pacific/Auckland` });
