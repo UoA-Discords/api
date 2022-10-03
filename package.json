@@ -4,7 +4,7 @@
     "workspaces": [
         "shared"
     ],
-    "version": "0.2.0",
+    "version": "0.2.1",
     "main": "build/index.js",
     "repository": "https://github.com/UoA-Discords/api.git",
     "author": "NachoToast <32235595+NachoToast@users.noreply.github.com>",
