@@ -1,7 +1,16 @@
+# dependencies
 node_modules/
+
+# package managers
 package-lock.json
-*.log
+pnpm-lock.yaml
+.yarn-integrity
+.npm*
+
+# user-generated
+config.json
 build/
 data/
-config.json
+.vscode/
 scripts/*migration*
+*.log
